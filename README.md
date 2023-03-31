@@ -1,2 +1,2 @@
 # orc-generator
-A tool for generating budget quotations with a simple configuration
+A tool for generating static files directly from HTML or URLs.
