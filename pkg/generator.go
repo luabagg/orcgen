@@ -14,11 +14,11 @@ const (
 	// Valid extension types constants.
 
 	// PDF const.
-	PDF = generator.PDF
+	PDF = internal.PDF
 	// PNG const.
-	PNG = generator.PNG
+	PNG = internal.PNG
 	// JPEG const.
-	JPEG = generator.JPEG
+	JPEG = internal.JPEG
 )
 
 var (
@@ -26,10 +26,17 @@ var (
 	FullPage bool = true
 )
 
-// New starts a .
-func New(ext generator.Ext) *internal.Director {
+// New starts a new orc-generator - Director contains the available methods.
+//
+// ext is the extension to be converted to (use the defined constants).
+//
+// Connect and Close are used for the Browser connection controll.
+// ConvertWebpage and ConvertHTML are used for page conversion.
+//
+// There are a set of setters for specific config.
+func New(ext internal.Ext) *internal.Director {
 	var gen generator.Generator
-	if gen = generator.Build(ext, FullPage); gen == nil {
+	if gen = internal.Build(ext, FullPage); gen == nil {
 		log.Fatal("Generator not found.")
 	}
 

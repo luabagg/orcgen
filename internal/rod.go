@@ -45,7 +45,7 @@ func (r *Rod) UrlToPage(url string) *rod.Page {
 	return page
 }
 
-// UrlToPage converts the binary to a rod Page instance.
+// ByteToPage converts the binary to a rod Page instance.
 func (r *Rod) ByteToPage(bin []byte) (*rod.Page, error) {
 	file, err := os.CreateTemp("", "*.html")
 	if err != nil {
