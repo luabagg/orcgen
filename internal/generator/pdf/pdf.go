@@ -1,4 +1,4 @@
-// package pdf implements the generator for PDF files.
+// package pdf implements the builder for PDF files.
 package pdf
 
 import (
@@ -6,21 +6,17 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orc-generator/internal/utils"
 )
 
-// PDFGen struct.
-type PDFGen struct {
-	FullPage bool
-	fileinfo utils.Fileinfo
+// PDFBuilder struct.
+type PDFBuilder struct {
+	fullPage bool
 }
 
-// generatePDF converts a rod Page instance to a PDF file.
-func (p *PDFGen) generatePDF(page *rod.Page) error {
-	defer page.Close()
-
+// GenerateFile converts a rod Page instance to a PDF file.
+func (p *PDFBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 	var pageRanges string
-	if !p.FullPage {
+	if !p.fullPage {
 		pageRanges = "1"
 	}
 
@@ -36,51 +32,13 @@ func (p *PDFGen) generatePDF(page *rod.Page) error {
 		PreferCSSPageSize:   true,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	bin, err := io.ReadAll(r)
-	if err != nil {
-		return err
-	}
-
-	p.fileinfo = utils.Fileinfo{
-		File:     bin,
-		Filesize: len(bin),
-	}
-
-	return nil
+	return io.ReadAll(r)
 }
 
-// ConvertWebpage converts from a URL.
-func (p *PDFGen) ConvertWebpage(url string) error {
-	page := utils.UrlToPage(url)
-
-	return p.generatePDF(page)
-}
-
-// ConvertWebpage converts from a file.
-func (p *PDFGen) ConvertHTML(html []byte) error {
-	page, err := utils.ByteToPage(html)
-	if err != nil {
-		return err
-	}
-
-	return p.generatePDF(page)
-}
-
-// GetOutput saves the file to the informed filepath.
-func (p *PDFGen) GetOutput(filepath string) error {
-	return p.fileinfo.Output(filepath)
-}
-
-// GetFilesize gets the filesize.
-func (p *PDFGen) GetFilesize() int {
-	return p.fileinfo.Filesize
-}
-
-// Close resets struct and close Browser connection.
-func (p *PDFGen) Close() {
-	p = new(PDFGen)
-	utils.CloseBrowser()
+// SetFullPage sets the pages to be converted. If false, only the first page is selected.
+func (p *PDFBuilder) SetFullPage(fullPage bool) {
+	p.fullPage = fullPage
 }

@@ -1,66 +1,26 @@
-// package png implements the generator for PNG files.
+// package png implements the builder for PNG files.
 package png
 
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orc-generator/internal/utils"
 )
 
-// PNGGen struct.
-type PNGGen struct {
-	FullPage bool
-	fileinfo utils.Fileinfo
+// PNGBuilder struct.
+type PNGBuilder struct {
+	fullPage bool
 }
 
-// generatePNG converts a rod Page instance to a PNG file.
-func (p *PNGGen) generatePNG(page *rod.Page) error {
-	defer page.Close()
-
+// GenerateFile converts a rod Page instance to a PNG file.
+func (p *PNGBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 	req := &proto.PageCaptureScreenshot{
 		Format: proto.PageCaptureScreenshotFormatPng,
 	}
 
-	bin, err := page.Screenshot(p.FullPage, req)
-	if err != nil {
-		return err
-	}
-
-	p.fileinfo = utils.Fileinfo{
-		File:     bin,
-		Filesize: len(bin),
-	}
-
-	return nil
+	return page.Screenshot(p.fullPage, req)
 }
 
-// ConvertWebpage converts from a URL.
-func (p *PNGGen) ConvertWebpage(url string) error {
-	return p.generatePNG(utils.UrlToPage(url))
-}
-
-// ConvertWebpage converts from a file.
-func (p *PNGGen) ConvertHTML(html []byte) error {
-	page, err := utils.ByteToPage(html)
-	if err != nil {
-		return err
-	}
-
-	return p.generatePNG(page)
-}
-
-// GetOutput saves the file to the informed filepath.
-func (p *PNGGen) GetOutput(filepath string) error {
-	return p.fileinfo.Output(filepath)
-}
-
-// GetFilesize gets the filesize.
-func (p *PNGGen) GetFilesize() int {
-	return p.fileinfo.Filesize
-}
-
-// Close resets struct and close Browser connection.
-func (p *PNGGen) Close() {
-	p = new(PNGGen)
-	utils.CloseBrowser()
+// SetFullPage sets the pages to be converted. If false, only the first page is selected.
+func (p *PNGBuilder) SetFullPage(fullPage bool) {
+	p.fullPage = fullPage
 }

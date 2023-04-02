@@ -1,10 +1,10 @@
-package utils
+package internal
 
 import (
 	rodutils "github.com/go-rod/rod/lib/utils"
 )
 
-// Fileinfo is used for file information control.
+// Fileinfo is used for file information controll.
 type Fileinfo struct {
 	File     []byte
 	Filesize int
