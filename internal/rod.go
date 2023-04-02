@@ -26,23 +26,9 @@ func (r *Rod) Close() {
 	r.browser.MustClose()
 }
 
-// waitLoad sets a wait time according to the page loading.
-func (r *Rod) waitLoad(page *rod.Page) {
-	page = page.Timeout(r.LoadTimeout).MustWaitLoad()
-
-	wait := page.WaitRequestIdle(r.PageIdleTime, nil, nil)
-	wait()
-
-	page.CancelTimeout()
-}
-
 // UrlToPage converts the URL to a rod Page instance.
 func (r *Rod) UrlToPage(url string) *rod.Page {
-	page := r.browser.MustPage(url)
-
-	r.waitLoad(page)
-
-	return page
+	return r.browser.MustPage(url)
 }
 
 // ByteToPage converts the binary to a rod Page instance.
@@ -60,7 +46,15 @@ func (r *Rod) ByteToPage(bin []byte) (*rod.Page, error) {
 
 	page := r.browser.MustPage("file://" + file.Name())
 
-	r.waitLoad(page)
-
 	return page, nil
+}
+
+// WaitLoad sets a wait time according to the page loading.
+func (r *Rod) WaitLoad(page *rod.Page) {
+	page = page.Timeout(r.LoadTimeout).MustWaitLoad()
+
+	wait := page.WaitRequestIdle(r.PageIdleTime, nil, nil)
+	wait()
+
+	page.CancelTimeout()
 }

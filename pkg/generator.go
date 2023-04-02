@@ -4,10 +4,7 @@
 package orcgen
 
 import (
-	"log"
-
 	"github.com/luabagg/orcgen/internal"
-	"github.com/luabagg/orcgen/internal/generator"
 )
 
 const (
@@ -35,10 +32,5 @@ var (
 //
 // There are a set of setters for specific config.
 func New(ext internal.Ext) *internal.Director {
-	var gen generator.Generator
-	if gen = internal.Build(ext, FullPage); gen == nil {
-		log.Fatal("Generator not found.")
-	}
-
-	return internal.NewDirector(gen).Connect()
+	return internal.NewDirector(ext, FullPage).Connect()
 }

@@ -27,9 +27,8 @@ var builders = map[Ext]generator.Generator{
 }
 
 // Build builds a new Generator.
-func Build(ext Ext, fullPage bool) generator.Generator {
+func Build(ext Ext) generator.Generator {
 	gen := builders[Ext(ext)]
-	gen.SetFullPage(fullPage)
 
 	return gen
 }

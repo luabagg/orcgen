@@ -4,6 +4,7 @@ package internal
 import (
 	"time"
 
+	"github.com/go-rod/rod"
 	"github.com/luabagg/orcgen/internal/generator"
 )
 
@@ -14,12 +15,12 @@ type Director struct {
 }
 
 // NewDirector opens a new Director instance.
-func NewDirector(g generator.Generator) *Director {
+func NewDirector(ext Ext, fullPage bool) *Director {
 	return &Director{
-		generator: g,
+		generator: Build(ext).SetFullPage(fullPage),
 		rod: &Rod{
-			LoadTimeout:  200 * time.Millisecond,
-			PageIdleTime: 10 * time.Second,
+			LoadTimeout:  10 * time.Second,
+			PageIdleTime: 200 * time.Millisecond,
 		},
 	}
 }
@@ -31,9 +32,16 @@ func (d *Director) Connect() *Director {
 	return d
 }
 
-// SetGenerator sets the specific builder.
-func (d *Director) SetGenerator(g generator.Generator) *Director {
-	d.generator = g
+// SetExt sets the extension to be converted to.
+func (d *Director) SetExt(ext Ext) *Director {
+	d.generator = Build(ext)
+
+	return d
+}
+
+// SetFullPage sets the pages to be converted. If false, only the first page is selected.
+func (d *Director) SetFullPage(fullPage bool) *Director {
+	d.generator.SetFullPage(fullPage)
 
 	return d
 }
@@ -52,11 +60,11 @@ func (d *Director) SetPageIdleTime(t time.Duration) *Director {
 	return d
 }
 
-// ConvertWebpage converts from a URL.
-func (d *Director) ConvertWebpage(url string) (*Fileinfo, error) {
-	page := d.rod.UrlToPage(url)
-
+// convert converts a rod Page to a FileInfo instance.
+func (d *Director) convert(page *rod.Page) (*Fileinfo, error) {
 	defer page.Close()
+
+	d.rod.WaitLoad(page)
 
 	b, err := d.generator.GenerateFile(page)
 	if err != nil {
@@ -67,6 +75,13 @@ func (d *Director) ConvertWebpage(url string) (*Fileinfo, error) {
 		File:     b,
 		Filesize: len(b),
 	}, nil
+}
+
+// ConvertWebpage converts from a URL.
+func (d *Director) ConvertWebpage(url string) (*Fileinfo, error) {
+	page := d.rod.UrlToPage(url)
+
+	return d.convert(page)
 }
 
 // ConvertHTML converts from a file.
@@ -76,20 +91,10 @@ func (d *Director) ConvertHTML(html []byte) (*Fileinfo, error) {
 		return nil, err
 	}
 
-	defer page.Close()
-
-	b, err := d.generator.GenerateFile(page)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Fileinfo{
-		File:     b,
-		Filesize: len(b),
-	}, nil
+	return d.convert(page)
 }
 
-// Close resets struct and close Browser connection.
+// Close resets struct and closes Browser connection.
 func (d *Director) Close() {
 	d.generator = nil
 	d.rod.Close()

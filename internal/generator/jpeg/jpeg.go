@@ -4,6 +4,7 @@ package jpeg
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/internal/generator"
 )
 
 // JPEGBuilder struct.
@@ -24,6 +25,8 @@ func (j *JPEGBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 }
 
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
-func (p *JPEGBuilder) SetFullPage(fullPage bool) {
-	p.fullPage = fullPage
+func (j *JPEGBuilder) SetFullPage(fullPage bool) generator.Generator {
+	j.fullPage = fullPage
+
+	return j
 }

@@ -10,5 +10,5 @@ type Generator interface {
 	// GenerateFile converts a rod Page instance to a file.
 	GenerateFile(page *rod.Page) ([]byte, error)
 	// SetFullPage sets the pages to be converted. If false, only the first page is selected.
-	SetFullPage(fullPage bool)
+	SetFullPage(fullPage bool) Generator
 }

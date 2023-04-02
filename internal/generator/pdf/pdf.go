@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/internal/generator"
 )
 
 // PDFBuilder struct.
@@ -39,6 +40,8 @@ func (p *PDFBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 }
 
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
-func (p *PDFBuilder) SetFullPage(fullPage bool) {
+func (p *PDFBuilder) SetFullPage(fullPage bool) generator.Generator {
 	p.fullPage = fullPage
+
+	return p
 }
