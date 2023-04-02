@@ -1,4 +1,4 @@
-module github.com/luabagg/orc-generator
+module github.com/luabagg/orcgen
 
 go 1.19
 

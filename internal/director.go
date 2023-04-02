@@ -4,7 +4,7 @@ package internal
 import (
 	"time"
 
-	"github.com/luabagg/orc-generator/internal/generator"
+	"github.com/luabagg/orcgen/internal/generator"
 )
 
 // Director controlls the page conversion methods.

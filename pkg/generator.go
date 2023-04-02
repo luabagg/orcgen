@@ -6,8 +6,8 @@ package orcgen
 import (
 	"log"
 
-	"github.com/luabagg/orc-generator/internal"
-	"github.com/luabagg/orc-generator/internal/generator"
+	"github.com/luabagg/orcgen/internal"
+	"github.com/luabagg/orcgen/internal/generator"
 )
 
 const (
