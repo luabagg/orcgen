@@ -1,4 +1,4 @@
-package examples
+package orcgen_test
 
 import (
 	"fmt"
@@ -7,10 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	orcgen "github.com/luabagg/orcgen/pkg"
+	"github.com/luabagg/orcgen"
 )
-
-// import "github.com/luabagg/orcgen"
 
 // Example_New gives examples using the New function from orcgen.
 func ExampleNew() {
@@ -24,7 +22,7 @@ func ExampleNew() {
 	f, _ := gen.ConvertHTML(getHTML())
 
 	filename := "html.pdf"
-	if err := f.Output(filename); err == nil {
+	if err := f.Output(getName(filename)); err == nil {
 		fmt.Printf("%s generated succesfully\n", filename)
 	}
 
@@ -35,7 +33,7 @@ func ExampleNew() {
 		ConvertHTML(getHTML())
 
 	filename = "html.png"
-	if err := f.Output(filename); err == nil {
+	if err := f.Output(getName(filename)); err == nil {
 		fmt.Printf("%s generated succesfully\n", filename)
 	}
 
@@ -46,7 +44,7 @@ func ExampleNew() {
 		ConvertWebpage("https://www.google.com")
 
 	filename = "google.pdf"
-	if err := f.Output(filename); err == nil {
+	if err := f.Output(getName(filename)); err == nil {
 		fmt.Printf("%s generated succesfully\n", filename)
 	}
 
@@ -59,7 +57,7 @@ func ExampleNew() {
 		ConvertWebpage("https://www.twitter.com")
 
 	filename = "twitter.jpeg"
-	if err := f.Output(filename); err == nil {
+	if err := f.Output(getName(filename)); err == nil {
 		fmt.Printf("%s generated succesfully\n", filename)
 	}
 
@@ -70,22 +68,10 @@ func ExampleNew() {
 	// twitter.jpeg generated succesfully
 }
 
-// Example_ConvertHTML gives examples using the ConvertHTML function from orcgen.
-func ExampleConvertHTML() {
-	filename := "html.pdf"
-	err := orcgen.ConvertHTML(orcgen.PDF, getHTML(), filename)
-	if err == nil {
-		fmt.Printf("%s generated succesfully\n", filename)
-	}
-
-	// Output:
-	// html.pdf generated succesfully
-}
-
-// Example_ConvertWebpage gives examples using the ConvertWebpage function from orcgen.
+// Example_ConvertWebpage gives examples using the ConvertWebpage function from
 func ExampleConvertWebpage() {
 	filename := "github.pdf"
-	err := orcgen.ConvertWebpage(orcgen.PDF, "https://www.github.com", filename)
+	err := orcgen.ConvertWebpage(orcgen.PDF, "https://www.github.com", getName(filename))
 	if err == nil {
 		fmt.Printf("%s generated succesfully\n", filename)
 	}
@@ -94,11 +80,27 @@ func ExampleConvertWebpage() {
 	// github.pdf generated succesfully
 }
 
+// Example_ConvertHTML gives examples using the ConvertHTML function from
+func ExampleConvertHTML() {
+	filename := "html.pdf"
+	err := orcgen.ConvertHTML(orcgen.PDF, getHTML(), getName(filename))
+	if err == nil {
+		fmt.Printf("%s generated succesfully\n", filename)
+	}
+
+	// Output:
+	// html.pdf generated succesfully
+}
+
 func getHTML() []byte {
-	file := filepath.Join(getBasepath(), "test.html")
+	file := filepath.Join(getBasepath(), "testdata/test.html")
 	html, _ := os.ReadFile(file)
 
 	return html
+}
+
+func getName(name string) string {
+	return filepath.Join(getBasepath(), "testdata", name)
 }
 
 func getBasepath() string {

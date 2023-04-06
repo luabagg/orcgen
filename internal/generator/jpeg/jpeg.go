@@ -1,4 +1,4 @@
-// package jpeg implements the builder for JPEG files.
+// Package jpeg implements the builder for JPEG files.
 package jpeg
 
 import (

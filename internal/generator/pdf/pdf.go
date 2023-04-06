@@ -1,4 +1,4 @@
-// package pdf implements the builder for PDF files.
+// Package pdf implements the builder for PDF files.
 package pdf
 
 import (

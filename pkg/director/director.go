@@ -3,22 +3,24 @@ package director
 import (
 	"time"
 
-	"github.com/go-rod/rod"
+	gorod "github.com/go-rod/rod"
 	"github.com/luabagg/orcgen/internal"
 	"github.com/luabagg/orcgen/internal/generator"
+	"github.com/luabagg/orcgen/internal/rod"
+	"github.com/luabagg/orcgen/pkg/fileinfo"
 )
 
 // Director controls the page conversion methods.
 type Director struct {
 	generator generator.Generator
-	rod       *internal.Rod
+	rod       *rod.Rod
 }
 
 // NewDirector opens a new Director instance.
 func NewDirector(ext internal.Ext) *Director {
 	return &Director{
 		generator: internal.Build(ext),
-		rod: &internal.Rod{
+		rod: &rod.Rod{
 			LoadTimeout:  10 * time.Second,
 			PageIdleTime: 200 * time.Millisecond,
 		},
@@ -60,8 +62,8 @@ func (d *Director) SetPageIdleTime(t time.Duration) *Director {
 	return d
 }
 
-// convert converts a rod Page to a FileInfo instance.
-func (d *Director) convert(page *rod.Page) (*Fileinfo, error) {
+// convert converts a rod Page to a Fileinfo instance.
+func (d *Director) convert(page *gorod.Page) (*fileinfo.Fileinfo, error) {
 	defer page.Close()
 
 	d.rod.WaitLoad(page)
@@ -71,21 +73,21 @@ func (d *Director) convert(page *rod.Page) (*Fileinfo, error) {
 		return nil, err
 	}
 
-	return &Fileinfo{
+	return &fileinfo.Fileinfo{
 		File:     b,
 		Filesize: len(b),
 	}, nil
 }
 
 // ConvertWebpage converts from an URL.
-func (d *Director) ConvertWebpage(url string) (*Fileinfo, error) {
+func (d *Director) ConvertWebpage(url string) (*fileinfo.Fileinfo, error) {
 	page := d.rod.UrlToPage(url)
 
 	return d.convert(page)
 }
 
 // ConvertHTML converts from a file.
-func (d *Director) ConvertHTML(html []byte) (*Fileinfo, error) {
+func (d *Director) ConvertHTML(html []byte) (*fileinfo.Fileinfo, error) {
 	page, err := d.rod.ByteToPage(html)
 	if err != nil {
 		return nil, err

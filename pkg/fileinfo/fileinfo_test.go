@@ -1,4 +1,4 @@
-package director
+package fileinfo
 
 import (
 	"io/ioutil"

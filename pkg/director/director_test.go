@@ -13,6 +13,7 @@ import (
 	"github.com/luabagg/orcgen/internal/generator/jpeg"
 	"github.com/luabagg/orcgen/internal/generator/pdf"
 	"github.com/luabagg/orcgen/internal/generator/png"
+	"github.com/luabagg/orcgen/pkg/fileinfo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -143,7 +144,7 @@ func TestDirector_convert(t *testing.T) {
 	pageMock := d.rod.Browser.MustPage()
 	defer pageMock.Close()
 
-	mockFileInfo := &Fileinfo{File: []byte("mock file"), Filesize: 9}
+	mockFileInfo := &fileinfo.Fileinfo{File: []byte("mock file"), Filesize: 9}
 
 	fileInfo, err := d.convert(pageMock)
 	if err != nil {

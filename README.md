@@ -1,4 +1,4 @@
-# Orcgen Project
+# Orcgen
 Orcgen is a Go package that enables the conversion of web pages and HTML content to various file formats like PDF, PNG, and JPEG. It provides an easy-to-use interface for generating these file formats from web pages and HTML.
 
 ## Functionalities
@@ -25,7 +25,7 @@ Then you can import it in your Go code:
 ## Example Usage
 The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen.
 
-You can see it in [examples](https://github.com/luabagg/orcgen/tree/main/examples) page.
+You can see it in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
 
 ## Contributors
 This project is an open-source project, and contributions from other developers are welcome. If you encounter any issues or have suggestions for improvement, please submit them on the project's GitHub page.

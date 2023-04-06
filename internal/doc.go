@@ -1,2 +1,2 @@
-// package internal contains the rod and builder implementation.
+// Package internal contains the builder implementation.
 package internal

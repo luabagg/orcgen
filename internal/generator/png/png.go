@@ -1,4 +1,4 @@
-// package png implements the builder for PNG files.
+// Package png implements the builder for PNG files.
 package png
 
 import (

@@ -1,7 +1,7 @@
-// orcgen generates files from HTML -
+// Package orcgen generates files from HTML -
 // any static webpage can be informed, or even an HTML file.
 // The file will be generated according the choosen extension.
-package pkg
+package orcgen
 
 import (
 	"github.com/luabagg/orcgen/internal"
