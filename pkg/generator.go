@@ -1,7 +1,7 @@
 // orcgen generates files from HTML -
 // any static webpage can be informed, or even the HTML itself.
 // The file will be generated according the choosen extension.
-package orcgen
+package pkg
 
 import (
 	"github.com/luabagg/orcgen/internal"
@@ -18,19 +18,14 @@ const (
 	JPEG = internal.JPEG
 )
 
-var (
-	// FullPage sets the pages to be converted. If false, only the first page is selected.
-	FullPage bool = true
-)
-
-// New starts a new orc-generator - Director contains the available methods.
+// New starts a new orcgen - the Director contains the available methods.
 //
-// ext is the extension to be converted to (use the defined constants).
+// ext is the extension to be converted to (use the defined constants above).
 //
 // Connect and Close are used for the Browser connection controll.
 // ConvertWebpage and ConvertHTML are used for page conversion.
 //
 // There are a set of setters for specific config.
 func New(ext internal.Ext) *internal.Director {
-	return internal.NewDirector(ext, FullPage).Connect()
+	return internal.NewDirector(ext).Connect()
 }

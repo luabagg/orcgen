@@ -4,7 +4,7 @@ import (
 	rodutils "github.com/go-rod/rod/lib/utils"
 )
 
-// Fileinfo is used for file information controll.
+// Fileinfo is used for file information control.
 type Fileinfo struct {
 	File     []byte
 	Filesize int

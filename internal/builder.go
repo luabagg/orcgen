@@ -19,7 +19,7 @@ const (
 	JPEG
 )
 
-// builders controlls the existing builders.
+// builders controls the existing builders.
 var builders = map[Ext]generator.Generator{
 	PDF:  &pdf.PDFBuilder{},
 	PNG:  &png.PNGBuilder{},

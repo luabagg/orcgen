@@ -8,16 +8,16 @@ import (
 	"github.com/luabagg/orcgen/internal/generator"
 )
 
-// Director controlls the page conversion methods.
+// Director controls the page conversion methods.
 type Director struct {
 	generator generator.Generator
 	rod       *Rod
 }
 
 // NewDirector opens a new Director instance.
-func NewDirector(ext Ext, fullPage bool) *Director {
+func NewDirector(ext Ext) *Director {
 	return &Director{
-		generator: Build(ext).SetFullPage(fullPage),
+		generator: Build(ext),
 		rod: &Rod{
 			LoadTimeout:  10 * time.Second,
 			PageIdleTime: 200 * time.Millisecond,
@@ -77,7 +77,7 @@ func (d *Director) convert(page *rod.Page) (*Fileinfo, error) {
 	}, nil
 }
 
-// ConvertWebpage converts from a URL.
+// ConvertWebpage converts from an URL.
 func (d *Director) ConvertWebpage(url string) (*Fileinfo, error) {
 	page := d.rod.UrlToPage(url)
 
@@ -94,7 +94,7 @@ func (d *Director) ConvertHTML(html []byte) (*Fileinfo, error) {
 	return d.convert(page)
 }
 
-// Close resets struct and closes Browser connection.
+// Close resets the generator and closes Browser connection.
 func (d *Director) Close() {
 	d.generator = nil
 	d.rod.Close()

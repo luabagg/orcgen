@@ -7,6 +7,7 @@ import (
 	"github.com/go-rod/rod"
 )
 
+// Rod is responsible for browsser operations.
 type Rod struct {
 	// Browser is a rod Browser instance.
 	browser *rod.Browser
