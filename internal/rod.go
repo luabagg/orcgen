@@ -10,7 +10,7 @@ import (
 // Rod is responsible for browsser operations.
 type Rod struct {
 	// Browser is a rod Browser instance.
-	browser *rod.Browser
+	Browser *rod.Browser
 	// LoadTimeout controlls max page load time before context is canceled.
 	LoadTimeout time.Duration
 	// PageIdleTime sets the wait time after the page stops receiving requests.
@@ -19,17 +19,17 @@ type Rod struct {
 
 // Connect starts the Browser connection.
 func (r *Rod) Connect() {
-	r.browser = rod.New().MustConnect()
+	r.Browser = rod.New().MustConnect()
 }
 
 // Close closes the Browser connection.
 func (r *Rod) Close() {
-	r.browser.MustClose()
+	r.Browser.MustClose()
 }
 
 // UrlToPage converts the URL to a rod Page instance.
 func (r *Rod) UrlToPage(url string) *rod.Page {
-	return r.browser.MustPage(url)
+	return r.Browser.MustPage(url)
 }
 
 // ByteToPage converts the binary to a rod Page instance.
@@ -45,7 +45,7 @@ func (r *Rod) ByteToPage(bin []byte) (*rod.Page, error) {
 		return &rod.Page{}, err
 	}
 
-	page := r.browser.MustPage("file://" + file.Name())
+	page := r.Browser.MustPage("file://" + file.Name())
 
 	return page, nil
 }

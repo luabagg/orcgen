@@ -15,7 +15,7 @@ func TestRod_Connect(t *testing.T) {
 	r := &Rod{}
 	r.Connect()
 	defer r.Close()
-	page, _ := r.browser.Page(proto.TargetCreateTarget{})
+	page, _ := r.Browser.Page(proto.TargetCreateTarget{})
 
 	assert.NotNil(t, page)
 }
@@ -25,7 +25,7 @@ func TestRod_Close(t *testing.T) {
 	r.Connect()
 	r.Close()
 
-	page, _ := r.browser.Page(proto.TargetCreateTarget{})
+	page, _ := r.Browser.Page(proto.TargetCreateTarget{})
 	assert.Nil(t, page)
 }
 
@@ -35,7 +35,7 @@ func TestRod_UrlToPage(t *testing.T) {
 		PageIdleTime: 200 * time.Millisecond,
 	}
 	rod.Connect()
-	defer rod.browser.Close()
+	defer rod.Browser.Close()
 
 	// Call UrlToPage function to create a page instance
 	page := rod.UrlToPage("https://www.example.com")
@@ -91,7 +91,7 @@ func TestRod_WaitLoad(t *testing.T) {
 	defer rod.Close()
 
 	// get a rod Page instance
-	page := rod.browser.MustPage("https://www.example.com")
+	page := rod.Browser.MustPage("https://www.example.com")
 	defer page.MustClose()
 
 	// call WaitLoad function

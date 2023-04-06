@@ -9,11 +9,11 @@ GOCLEAN= $(GOCMD) clean
 TEST_FLAGS=-race
 
 # Coverage
-COVERAGE_FILE=testdata/coverage.out
-COVERAGE_HTML=testdata/coverage.html
+COVERAGE_FILE=coverage.out
+COVERAGE_HTML=coverage.html
 
-# Examples
-EXAMPLE=webpage
+# Clean
+CLEAN_FLAGS=-testcache
 
 all: test cover
 
@@ -26,13 +26,9 @@ cover:
 	$(GOTEST) -v -coverprofile=$(COVERAGE_FILE) ./...
 	$(GOCOVER) -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
 
-example:
-	@echo "Running example..."
-	$(GORUN) examples/convert-$(EXAMPLE)/main.go
-
 clean:
 	@echo "Cleaning up..."
-	@$(GOCLEAN) -testcache
+	@$(GOCLEAN) $(CLEAN_FLAGS)
 	@rm -f $(COVERAGE_FILE) $(COVERAGE_HTML)
 
 .PHONY: all test cover clean

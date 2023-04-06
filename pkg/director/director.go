@@ -1,24 +1,24 @@
-// package internal contains the rod implementation.
-package internal
+package director
 
 import (
 	"time"
 
 	"github.com/go-rod/rod"
+	"github.com/luabagg/orcgen/internal"
 	"github.com/luabagg/orcgen/internal/generator"
 )
 
 // Director controls the page conversion methods.
 type Director struct {
 	generator generator.Generator
-	rod       *Rod
+	rod       *internal.Rod
 }
 
 // NewDirector opens a new Director instance.
-func NewDirector(ext Ext) *Director {
+func NewDirector(ext internal.Ext) *Director {
 	return &Director{
-		generator: Build(ext),
-		rod: &Rod{
+		generator: internal.Build(ext),
+		rod: &internal.Rod{
 			LoadTimeout:  10 * time.Second,
 			PageIdleTime: 200 * time.Millisecond,
 		},
@@ -33,8 +33,8 @@ func (d *Director) Connect() *Director {
 }
 
 // SetExt sets the extension to be converted to.
-func (d *Director) SetExt(ext Ext) *Director {
-	d.generator = Build(ext)
+func (d *Director) SetExt(ext internal.Ext) *Director {
+	d.generator = internal.Build(ext)
 
 	return d
 }
@@ -94,8 +94,7 @@ func (d *Director) ConvertHTML(html []byte) (*Fileinfo, error) {
 	return d.convert(page)
 }
 
-// Close resets the generator and closes Browser connection.
+// Close closes Browser connection.
 func (d *Director) Close() {
-	d.generator = nil
 	d.rod.Close()
 }

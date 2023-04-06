@@ -1,12 +1,14 @@
-// package internal contains the rod implementation.
-package internal
+package director
 
 import (
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/internal"
 	"github.com/luabagg/orcgen/internal/generator"
 	"github.com/luabagg/orcgen/internal/generator/jpeg"
 	"github.com/luabagg/orcgen/internal/generator/pdf"
@@ -14,22 +16,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Example() {
+	// starts a new connection and converts the byte array to PNG
+	fi, _ := NewDirector(internal.PNG).Connect().ConvertHTML([]byte("Example"))
+	fmt.Printf("File size: %d bytes\n", fi.Filesize)
+
+	// saves the file output to "test.png"
+	filepath := "test.png"
+	fi.Output(filepath)
+
+	// gets file info
+	info, _ := os.Stat(filepath)
+	fmt.Printf("New file saved with %d bytes", info.Size())
+
+	// Output:
+	// File size: 7395 bytes
+	// New file saved with 7395 bytes
+
+	os.Remove(filepath)
+}
+
 func TestNewDirector(t *testing.T) {
 	tests := []struct {
 		name string
-		ext  Ext
+		ext  internal.Ext
 	}{
 		{
 			"test PDF",
-			PDF,
+			internal.PDF,
 		},
 		{
 			"test PNG",
-			PNG,
+			internal.PNG,
 		},
 		{
 			"test JPEG",
-			JPEG,
+			internal.JPEG,
 		},
 	}
 	for _, tc := range tests {
@@ -46,32 +68,32 @@ func TestNewDirector(t *testing.T) {
 }
 
 func TestDirector_Connect(t *testing.T) {
-	d := NewDirector(Ext(0))
+	d := NewDirector(internal.Ext(0))
 	d.Connect()
-	defer d.rod.browser.Close()
+	defer d.rod.Browser.Close()
 
-	assert.NotNil(t, d.rod.browser)
+	assert.NotNil(t, d.rod.Browser)
 }
 
 func TestDirector_SetExt(t *testing.T) {
 	testCases := []struct {
 		name    string
-		ext     Ext
+		ext     internal.Ext
 		builder generator.Generator
 	}{
 		{
 			name:    "test PDF ext",
-			ext:     PDF,
+			ext:     internal.PDF,
 			builder: &pdf.PDFBuilder{},
 		},
 		{
 			name:    "test PNG ext",
-			ext:     PNG,
+			ext:     internal.PNG,
 			builder: &png.PNGBuilder{},
 		},
 		{
 			name:    "test JPEG ext",
-			ext:     JPEG,
+			ext:     internal.JPEG,
 			builder: &jpeg.JPEGBuilder{},
 		},
 	}
@@ -80,7 +102,7 @@ func TestDirector_SetExt(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			d := NewDirector(Ext(0))
+			d := NewDirector(internal.Ext(0))
 			dcopy := *d.SetExt(tc.ext)
 
 			assert.IsType(t, Director{}, dcopy)
@@ -90,7 +112,7 @@ func TestDirector_SetExt(t *testing.T) {
 }
 
 func TestDirector_SetFullPage(t *testing.T) {
-	d := NewDirector(Ext(0))
+	d := NewDirector(internal.Ext(0))
 	d = d.SetFullPage(true)
 
 	assert.IsType(t, new(Director), d)
@@ -98,7 +120,7 @@ func TestDirector_SetFullPage(t *testing.T) {
 
 func TestDirector_SetLoadTimeout(t *testing.T) {
 	time := 1 * time.Second
-	d := NewDirector(Ext(0))
+	d := NewDirector(internal.Ext(0))
 	d = d.SetLoadTimeout(time)
 
 	assert.IsType(t, new(Director), d)
@@ -107,7 +129,7 @@ func TestDirector_SetLoadTimeout(t *testing.T) {
 
 func TestDirector_SetPageIdleTime(t *testing.T) {
 	time := 1 * time.Second
-	d := NewDirector(Ext(0))
+	d := NewDirector(internal.Ext(0))
 	d = d.SetPageIdleTime(time)
 
 	assert.IsType(t, new(Director), d)
@@ -115,10 +137,10 @@ func TestDirector_SetPageIdleTime(t *testing.T) {
 }
 
 func TestDirector_convert(t *testing.T) {
-	d := NewDirector(Ext(0)).Connect()
+	d := NewDirector(internal.Ext(0)).Connect()
 	d.generator = &MockGenerator{}
 
-	pageMock := d.rod.browser.MustPage()
+	pageMock := d.rod.Browser.MustPage()
 	defer pageMock.Close()
 
 	mockFileInfo := &Fileinfo{File: []byte("mock file"), Filesize: 9}
@@ -132,7 +154,7 @@ func TestDirector_convert(t *testing.T) {
 }
 
 func TestDirector_ConvertWebpage(t *testing.T) {
-	d := NewDirector(Ext(0)).Connect()
+	d := NewDirector(internal.Ext(0)).Connect()
 
 	fileInfo, err := d.ConvertWebpage("https://google.com")
 
@@ -142,7 +164,7 @@ func TestDirector_ConvertWebpage(t *testing.T) {
 }
 
 func TestDirector_ConvertHTML(t *testing.T) {
-	d := NewDirector(Ext(0)).Connect()
+	d := NewDirector(internal.Ext(0)).Connect()
 
 	html := []byte("<html><head><title>ORC gen</title></head><body><h1>Hello, World!</h1></body></html>")
 	fileInfo, err := d.ConvertHTML(html)
@@ -153,13 +175,11 @@ func TestDirector_ConvertHTML(t *testing.T) {
 }
 
 func TestDirector_Close(t *testing.T) {
-	d := NewDirector(Ext(0)).Connect()
+	d := NewDirector(internal.Ext(0)).Connect()
 	d.Close()
 
-	page, _ := d.rod.browser.Page(proto.TargetCreateTarget{})
+	page, _ := d.rod.Browser.Page(proto.TargetCreateTarget{})
 	assert.Nil(t, page)
-
-	assert.Nil(t, d.generator)
 }
 
 type MockGenerator struct{}

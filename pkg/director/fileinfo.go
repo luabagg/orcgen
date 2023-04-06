@@ -1,4 +1,4 @@
-package internal
+package director
 
 import (
 	rodutils "github.com/go-rod/rod/lib/utils"
