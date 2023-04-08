@@ -10,7 +10,7 @@ import (
 	"github.com/luabagg/orcgen"
 )
 
-// Example_New gives examples using the New function from orcgen.
+// ExampleNew gives examples using the New function from orcgen.
 func ExampleNew() {
 	// starts the connection.
 	gen := orcgen.New(orcgen.PDF)
@@ -68,7 +68,7 @@ func ExampleNew() {
 	// twitter.jpeg generated succesfully
 }
 
-// Example_ConvertWebpage gives examples using the ConvertWebpage function from
+// ExampleConvertWebpage gives examples using the ConvertWebpage function from
 func ExampleConvertWebpage() {
 	filename := "github.pdf"
 	err := orcgen.ConvertWebpage(orcgen.PDF, "https://www.github.com", getName(filename))
@@ -80,7 +80,7 @@ func ExampleConvertWebpage() {
 	// github.pdf generated succesfully
 }
 
-// Example_ConvertHTML gives examples using the ConvertHTML function from
+// ExampleConvertHTML gives examples using the ConvertHTML function from
 func ExampleConvertHTML() {
 	filename := "html.pdf"
 	err := orcgen.ConvertHTML(orcgen.PDF, getHTML(), getName(filename))

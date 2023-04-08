@@ -49,7 +49,7 @@ func ConvertWebpage(ext internal.Ext, url string, output string) error {
 	return fi.Output(output)
 }
 
-// ConvertWebpage converts the informed bytes to the ext format, and saves the file.
+// ConvertHTML converts the informed bytes to the ext format, and saves the file.
 //
 // ext is the extension to be converted to (use the defined constants above).
 // html is the html byte array (if it's a filepath, use os.ReadFile(filepath)).
