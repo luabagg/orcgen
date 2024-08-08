@@ -10,6 +10,7 @@ import (
 // JPEGBuilder struct.
 type JPEGBuilder struct {
 	fullPage bool
+	config   generator.Config
 }
 
 // GenerateFile converts a rod Page instance to a PNG file.
@@ -27,6 +28,12 @@ func (j *JPEGBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
 func (j *JPEGBuilder) SetFullPage(fullPage bool) generator.Generator {
 	j.fullPage = fullPage
+
+	return j
+}
+
+func (j *JPEGBuilder) Configure(c generator.Config) generator.Generator {
+	j.config = c
 
 	return j
 }

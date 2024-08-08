@@ -12,6 +12,7 @@ import (
 // PDFBuilder struct.
 type PDFBuilder struct {
 	fullPage bool
+	config   generator.Config
 }
 
 // GenerateFile converts a rod Page instance to a PDF file.
@@ -22,8 +23,8 @@ func (p *PDFBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 	}
 
 	r, err := page.PDF(&proto.PagePrintToPDF{
-		Landscape:           true,
-		DisplayHeaderFooter: true,
+		Landscape:           p.config.Landscape,
+		DisplayHeaderFooter: p.config.DisplayHeaderFooter,
 		PrintBackground:     true,
 		MarginTop:           new(float64),
 		MarginBottom:        new(float64),
@@ -42,6 +43,12 @@ func (p *PDFBuilder) GenerateFile(page *rod.Page) ([]byte, error) {
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
 func (p *PDFBuilder) SetFullPage(fullPage bool) generator.Generator {
 	p.fullPage = fullPage
+
+	return p
+}
+
+func (p *PDFBuilder) Configure(c generator.Config) generator.Generator {
+	p.config = c
 
 	return p
 }

@@ -27,7 +27,8 @@ const (
 //
 // There are a set of setters for specific config.
 func New(ext internal.Ext) *director.Director {
-	return director.NewDirector(ext).Connect()
+	dir := director.NewDirector(ext)
+	return dir.Connect()
 }
 
 // ConvertWebpage converts the url to the ext format, and saves the file.

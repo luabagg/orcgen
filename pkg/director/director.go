@@ -5,6 +5,7 @@ import (
 
 	gorod "github.com/go-rod/rod"
 	"github.com/luabagg/orcgen/internal"
+	"github.com/luabagg/orcgen/internal/configurator"
 	"github.com/luabagg/orcgen/internal/generator"
 	"github.com/luabagg/orcgen/internal/rod"
 	"github.com/luabagg/orcgen/pkg/fileinfo"
@@ -12,8 +13,9 @@ import (
 
 // Director controls the page conversion methods.
 type Director struct {
-	generator generator.Generator
-	rod       *rod.Rod
+	generator    generator.Generator
+	configurator configurator.Configurator
+	rod          *rod.Rod
 }
 
 // NewDirector opens a new Director instance.
@@ -44,6 +46,12 @@ func (d *Director) SetExt(ext internal.Ext) *Director {
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
 func (d *Director) SetFullPage(fullPage bool) *Director {
 	d.generator.SetFullPage(fullPage)
+
+	return d
+}
+
+func (d *Director) Configure(c generator.Config) *Director {
+	d.configurator.Configure(c)
 
 	return d
 }

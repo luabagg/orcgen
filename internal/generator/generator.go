@@ -4,6 +4,11 @@ import (
 	"github.com/go-rod/rod"
 )
 
+type Config struct {
+	Landscape           bool
+	DisplayHeaderFooter bool
+}
+
 // Generator interface contains the methods used for page conversion.
 type Generator interface {
 	// GenerateFile converts a rod Page instance to a file.
