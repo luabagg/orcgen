@@ -1,4 +1,4 @@
-package rod
+package webdriver
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRod_Connect(t *testing.T) {
-	r := &Rod{}
+func TestWebDriver_Connect(t *testing.T) {
+	r := &WebDriver{}
 	r.Connect()
 	defer r.Close()
 	page, _ := r.Browser.Page(proto.TargetCreateTarget{})
@@ -20,8 +20,8 @@ func TestRod_Connect(t *testing.T) {
 	assert.NotNil(t, page)
 }
 
-func TestRod_Close(t *testing.T) {
-	r := &Rod{}
+func TestWebDriver_Close(t *testing.T) {
+	r := &WebDriver{}
 	r.Connect()
 	r.Close()
 
@@ -29,16 +29,16 @@ func TestRod_Close(t *testing.T) {
 	assert.Nil(t, page)
 }
 
-func TestRod_UrlToPage(t *testing.T) {
-	rod := Rod{
+func TestWebDriver_UrlToPage(t *testing.T) {
+	webDriver := WebDriver{
 		LoadTimeout:  10 * time.Second,
 		PageIdleTime: 200 * time.Millisecond,
 	}
-	rod.Connect()
-	defer rod.Browser.Close()
+	webDriver.Connect()
+	defer webDriver.Browser.Close()
 
 	// Call UrlToPage function to create a page instance
-	page := rod.UrlToPage("https://www.example.com")
+	page := webDriver.UrlToPage("https://www.example.com")
 	assert.NotNil(t, page)
 
 	// Check that the page has loaded successfully
@@ -55,17 +55,17 @@ func GetDir() (string, error) {
 	return dir, nil
 }
 
-func TestRod_ByteToPage(t *testing.T) {
-	rod := Rod{
+func TestWebDriver_HTMLToPage(t *testing.T) {
+	webDriver := WebDriver{
 		LoadTimeout:  10 * time.Second,
 		PageIdleTime: 200 * time.Millisecond,
 	}
-	rod.Connect()
-	defer rod.Close()
+	webDriver.Connect()
+	defer webDriver.Close()
 
-	// convert the HTML byte slice to a rod Page instance
+	// convert the HTML byte slice to a Rod Page instance
 	html := []byte("<html><head><title>ORC gen</title></head><body><h1>Hello, World!</h1></body></html>")
-	page, err := rod.ByteToPage(html)
+	page, err := webDriver.HTMLToPage(html)
 	defer page.MustClose()
 
 	assert.NoError(t, err)
@@ -82,20 +82,20 @@ func TestRod_ByteToPage(t *testing.T) {
 	assert.Equal(t, "ORC gen", title)
 }
 
-func TestRod_WaitLoad(t *testing.T) {
-	rod := &Rod{
+func TestWebDriver_WaitLoad(t *testing.T) {
+	webDriver := &WebDriver{
 		LoadTimeout:  10 * time.Second,
 		PageIdleTime: 200 * time.Millisecond,
 	}
-	rod.Connect()
-	defer rod.Close()
+	webDriver.Connect()
+	defer webDriver.Close()
 
-	// get a rod Page instance
-	page := rod.Browser.MustPage("https://www.example.com")
+	// get a WebDriver Page instance
+	page := webDriver.Browser.MustPage("https://www.example.com")
 	defer page.MustClose()
 
 	// call WaitLoad function
-	rod.WaitLoad(page)
+	webDriver.WaitLoad(page)
 
 	// assert that the page is loaded and idle
 	if !page.MustEval(`() => window.performance.timing.loadEventEnd > 0`).Bool() {
