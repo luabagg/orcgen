@@ -1,14 +1,15 @@
-package png
+package pdf
 
 import (
 	"testing"
 
 	"github.com/go-rod/rod"
-	"github.com/luabagg/orcgen/internal/generator"
+	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/pkg/handlers"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPNGBuilder_SetFullPage(t *testing.T) {
+func TestPDFHandler_SetFullPage(t *testing.T) {
 	tests := []struct {
 		name  string
 		input bool
@@ -26,49 +27,49 @@ func TestPNGBuilder_SetFullPage(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			// create a new PNGBuilder instance
-			instance := new(PNGBuilder).SetFullPage(tc.input)
+			// create a new PDFHandler instance
+			instance := New(proto.PagePrintToPDF{})
 
-			assert.Implements(t, (*generator.Generator)(nil), instance, "expected to be a Generator instance")
+			assert.Implements(t, (*handlers.FileHandler[proto.PagePrintToPDF])(nil), instance, "expected to be a Generator instance")
 		})
 	}
 }
 
-func TestPNGBuilder_GenerateFile(t *testing.T) {
+func TestPDFHandler_GenerateFile(t *testing.T) {
 	// create a new browser instance
 	b := rod.New().MustConnect()
 	defer b.MustClose()
 
-	// create a new PNGBuilder instance
-	pngBuilder := &PNGBuilder{}
+	// create a new PDFHandler instance
+	pdfHandler := New(proto.PagePrintToPDF{})
 
 	tests := []struct {
 		name     string
-		instance generator.Generator
+		instance handlers.FileHandler[proto.PagePrintToPDF]
 		input    *rod.Page
 	}{
 		{
 			name:     "simple page",
-			instance: pngBuilder.SetFullPage(false),
+			instance: pdfHandler,
 			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
 		},
 		{
 			name:     "fullpage",
-			instance: pngBuilder.SetFullPage(true),
+			instance: pdfHandler,
 			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
 		},
 		{
-			instance: pngBuilder,
+			instance: pdfHandler,
 			input:    b.MustPage(),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// generate the PNG file
-			pngData, err := tc.instance.GenerateFile(tc.input)
+			// generate the PDF file
+			pdfData, err := tc.instance.GenerateFile(tc.input)
 
 			assert.NoError(t, err, "Expected no error")
-			assert.NotEmpty(t, pngData, "Expected bytes")
+			assert.NotEmpty(t, pdfData, "Expected bytes")
 
 			tc.input.MustClose()
 		})

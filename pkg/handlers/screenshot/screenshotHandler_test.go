@@ -1,14 +1,15 @@
-package jpeg
+package screenshot
 
 import (
 	"testing"
 
 	"github.com/go-rod/rod"
-	"github.com/luabagg/orcgen/internal/generator"
+	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/pkg/handlers"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJPEGBuilder_SetFullPage(t *testing.T) {
+func TestScreenshotHandler_SetFullPage(t *testing.T) {
 	tests := []struct {
 		name  string
 		input bool
@@ -26,39 +27,39 @@ func TestJPEGBuilder_SetFullPage(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			// create a new JPEGBuilder instance
-			instance := new(JPEGBuilder).SetFullPage(tc.input)
+			// create a new ScreenshotHandler instance
+			instance := New(proto.PageCaptureScreenshot{})
 
-			assert.Implements(t, (*generator.Generator)(nil), instance, "expected to be a Generator instance")
+			assert.Implements(t, (*handlers.FileHandler[proto.PageCaptureScreenshot])(nil), instance, "expected to be a Generator instance")
 		})
 	}
 }
 
-func TestJPEGBuilder_GenerateFile(t *testing.T) {
+func TestScreenshotHandler_GenerateFile(t *testing.T) {
 	// create a new browser instance
 	b := rod.New().MustConnect()
 	defer b.MustClose()
 
-	// create a new JPEGBuilder instance
-	jpegBuilder := &JPEGBuilder{}
+	// create a new ScreenshotHandler instance
+	screenshotHandler := New(proto.PageCaptureScreenshot{})
 
 	tests := []struct {
 		name     string
-		instance generator.Generator
+		instance handlers.FileHandler[proto.PageCaptureScreenshot]
 		input    *rod.Page
 	}{
 		{
 			name:     "simple page",
-			instance: jpegBuilder.SetFullPage(false),
+			instance: screenshotHandler,
 			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
 		},
 		{
 			name:     "fullpage",
-			instance: jpegBuilder.SetFullPage(true),
+			instance: screenshotHandler,
 			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
 		},
 		{
-			instance: jpegBuilder,
+			instance: screenshotHandler,
 			input:    b.MustPage(),
 		},
 	}
