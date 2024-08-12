@@ -1,69 +1,45 @@
 // Package orcgen generates files from HTML -
 // any static webpage can be informed, or even an HTML file.
-// The file will be generated according the choosen extension.
+// The file will be generated according the configured handler.
 package orcgen
 
 import (
-	"github.com/luabagg/orcgen/internal"
-	"github.com/luabagg/orcgen/pkg/director"
+	"github.com/luabagg/orcgen/pkg/fileinfo"
+	"github.com/luabagg/orcgen/pkg/handlers"
+	"github.com/luabagg/orcgen/pkg/webdriver"
 )
 
-// Valid extension types constants.
-const (
-	// PDF const.
-	PDF = internal.PDF
-	// PNG const.
-	PNG = internal.PNG
-	// JPEG const.
-	JPEG = internal.JPEG
-)
-
-// New starts a new Director - the Director contains the available methods for file conversion.
+// ConvertHTML converts the bytes using the given handler, and returns a Fileinfo object.
 //
-// ext is the extension to be converted to (use the defined constants above).
-//
-// Connect and Close are used for the Browser connection control.
-// ConvertWebpage and ConvertHTML are used for page conversion.
-//
-// There are a set of setters for specific config.
-func New(ext internal.Ext) *director.Director {
-	return director.NewDirector(ext).Connect()
-}
-
-// ConvertWebpage converts the url to the ext format, and saves the file.
-//
-// ext is the extension to be converted to (use the defined constants above).
-// url is the url to convert.
-// output is a filepath containing the extension.
-//
-// The connection is automatically closed.
-func ConvertWebpage(ext internal.Ext, url string, output string) error {
-	d := New(ext)
-	defer d.Close()
-
-	fi, err := d.ConvertWebpage(url)
-	if err != nil {
-		return err
-	}
-
-	return fi.Output(output)
-}
-
-// ConvertHTML converts the informed bytes to the ext format, and saves the file.
-//
-// ext is the extension to be converted to (use the defined constants above).
+// handler is a Handler instance (see pkg/handlers).
 // html is the html byte array (if it's a filepath, use os.ReadFile(filepath)).
-// output is a filepath containing the extension.
 //
-// The connection is automatically closed.
-func ConvertHTML(ext internal.Ext, html []byte, output string) error {
-	d := New(ext)
-	defer d.Close()
+// The connection with the Browser is automatically closed.
+func ConvertHTML[T handlers.Config](handler handlers.FileHandler[T], html []byte) (*fileinfo.Fileinfo, error) {
+	wd := webdriver.FromDefault()
+	defer wd.Close()
 
-	fi, err := d.ConvertHTML(html)
+	page, err := wd.HTMLToPage(html)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	wd.WaitLoad(page)
 
-	return fi.Output(output)
+	return handler.GenerateFile(page)
+}
+
+// ConvertWebpage converts the url using the given handler, and returns a Fileinfo object
+//
+// handler is a Handler instance (see pkg/handlers).
+// url will be converted as configured, if you need special treats, check the Webdriver docs.
+//
+// The connection with the Browser is automatically closed.
+func ConvertWebpage[T handlers.Config](handler handlers.FileHandler[T], url string) (*fileinfo.Fileinfo, error) {
+	wd := webdriver.FromDefault()
+	defer wd.Close()
+
+	page := wd.UrlToPage(url)
+	wd.WaitLoad(page)
+
+	return handler.GenerateFile(page)
 }
