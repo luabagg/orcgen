@@ -11,37 +11,47 @@ import (
 )
 
 // PDFHandler struct.
-type PDFHandler[T proto.PagePrintToPDF] struct {
+type PDFHandler struct {
 	config   *proto.PagePrintToPDF
 	fullPage bool
 }
 
-func New[T proto.PagePrintToPDF](config T) handlers.FileHandler[T] {
-	builder := &PDFHandler[T]{
+// New creates a new PDFHandler instance.
+func New() handlers.FileHandler[proto.PagePrintToPDF] {
+	handler := &PDFHandler{
 		fullPage: false,
 	}
-	builder.SetConfig(config)
+	handler.SetConfig(proto.PagePrintToPDF{
+		Landscape:           true,
+		DisplayHeaderFooter: true,
+		PrintBackground:     true,
+		MarginTop:           new(float64),
+		MarginBottom:        new(float64),
+		MarginLeft:          new(float64),
+		MarginRight:         new(float64),
+		PreferCSSPageSize:   true,
+	})
 
-	return builder
+	return handler
 }
 
-func (p *PDFHandler[T]) SetConfig(config T) handlers.FileHandler[T] {
-	cfg := proto.PagePrintToPDF(config)
-	p.config = &cfg
+// SetConfig adds the config to the instance.
+func (p *PDFHandler) SetConfig(config proto.PagePrintToPDF) handlers.FileHandler[proto.PagePrintToPDF] {
+	p.config = &config
 
 	return p
 }
 
 // SetFullPage sets the pages to be converted. If false, only the first page is selected.
 // Default is false.
-func (p *PDFHandler[T]) SetFullPage(fullPage bool) handlers.FileHandler[T] {
+func (p *PDFHandler) SetFullPage(fullPage bool) handlers.FileHandler[proto.PagePrintToPDF] {
 	p.fullPage = fullPage
 
 	return p
 }
 
 // GenerateFile converts a rod Page instance to a PDF file.
-func (p *PDFHandler[T]) GenerateFile(page *rod.Page) (*fileinfo.Fileinfo, error) {
+func (p *PDFHandler) GenerateFile(page *rod.Page) (*fileinfo.Fileinfo, error) {
 	if !p.fullPage && p.config.PageRanges == "" {
 		p.config.PageRanges = "1"
 	}

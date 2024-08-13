@@ -9,6 +9,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestScreenshotHandler_SetConfig(t *testing.T) {
+	tests := []struct {
+		name  string
+		input proto.PageCaptureScreenshot
+	}{
+		{
+			name:  "valid config",
+			input: proto.PageCaptureScreenshot{},
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// create a new ScreenshotHandler instance
+			instance := New().SetConfig(tc.input)
+
+			assert.Implements(t, (*handlers.FileHandler[proto.PageCaptureScreenshot])(nil), instance, "expected to be a Generator instance")
+		})
+	}
+}
+
 func TestScreenshotHandler_SetFullPage(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -28,7 +50,7 @@ func TestScreenshotHandler_SetFullPage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			// create a new ScreenshotHandler instance
-			instance := New(proto.PageCaptureScreenshot{})
+			instance := New()
 
 			assert.Implements(t, (*handlers.FileHandler[proto.PageCaptureScreenshot])(nil), instance, "expected to be a Generator instance")
 		})
@@ -41,7 +63,7 @@ func TestScreenshotHandler_GenerateFile(t *testing.T) {
 	defer b.MustClose()
 
 	// create a new ScreenshotHandler instance
-	screenshotHandler := New(proto.PageCaptureScreenshot{})
+	screenshotHandler := New()
 
 	tests := []struct {
 		name     string

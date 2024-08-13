@@ -28,7 +28,7 @@ type WebDriver struct {
 func FromDefault() *WebDriver {
 	wd := &WebDriver{
 		LoadTimeout:  30 * time.Second,
-		PageIdleTime: 5 * time.Second,
+		PageIdleTime: 2 * time.Second,
 	}
 	wd.Connect()
 

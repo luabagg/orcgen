@@ -9,6 +9,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPDFHandler_SetConfig(t *testing.T) {
+	tests := []struct {
+		name  string
+		input proto.PagePrintToPDF
+	}{
+		{
+			name:  "valid config",
+			input: proto.PagePrintToPDF{},
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// create a new PDFHandler instance
+			instance := New().SetConfig(tc.input)
+
+			assert.Implements(t, (*handlers.FileHandler[proto.PagePrintToPDF])(nil), instance, "expected to be a Generator instance")
+		})
+	}
+}
+
 func TestPDFHandler_SetFullPage(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -28,7 +50,7 @@ func TestPDFHandler_SetFullPage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			// create a new PDFHandler instance
-			instance := New(proto.PagePrintToPDF{})
+			instance := New().SetFullPage(tc.input)
 
 			assert.Implements(t, (*handlers.FileHandler[proto.PagePrintToPDF])(nil), instance, "expected to be a Generator instance")
 		})
@@ -41,7 +63,7 @@ func TestPDFHandler_GenerateFile(t *testing.T) {
 	defer b.MustClose()
 
 	// create a new PDFHandler instance
-	pdfHandler := New(proto.PagePrintToPDF{})
+	pdfHandler := New()
 
 	tests := []struct {
 		name     string
@@ -55,7 +77,7 @@ func TestPDFHandler_GenerateFile(t *testing.T) {
 		},
 		{
 			name:     "fullpage",
-			instance: pdfHandler,
+			instance: pdfHandler.SetFullPage(true),
 			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
 		},
 		{
