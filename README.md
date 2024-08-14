@@ -44,7 +44,19 @@ Then you can import it in your Go code:
 The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen.
 It's the way-to-go if you're trying to use this package for the first time.
 
-You can see it in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
+```go
+    import "github.com/luabagg/orcgen"
+
+    orcgen.Generate(
+        "https://www.github.com",
+        proto.PageCaptureScreenshot{
+            Format: proto.PageCaptureScreenshotFormatWebp,
+        },
+        "github.webp",
+    )
+```
+
+You can more in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
 
 ## Contributors
 
