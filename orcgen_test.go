@@ -4,27 +4,34 @@ import (
 	"os"
 	"testing"
 
-	"github.com/luabagg/orcgen/internal"
-	"github.com/luabagg/orcgen/pkg/director"
+	"github.com/go-rod/rod/lib/proto"
+	"github.com/luabagg/orcgen/pkg/fileinfo"
+	"github.com/luabagg/orcgen/pkg/handlers"
+	"github.com/luabagg/orcgen/pkg/handlers/pdf"
+	"github.com/luabagg/orcgen/pkg/handlers/screenshot"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
+func TestGenerator(t *testing.T) {
+	html, _ := os.ReadFile("testdata/test.html")
+
 	tests := []struct {
-		name string
-		ext  internal.Ext
+		name      string
+		pdfConfig *proto.PagePrintToPDF
+		html      []byte
+		testErr   bool
 	}{
 		{
-			"test PDF",
-			PDF,
+			"test HTML PDF generation",
+			&proto.PagePrintToPDF{},
+			html,
+			false,
 		},
 		{
-			"test PNG",
-			PNG,
-		},
-		{
-			"test JPEG",
-			JPEG,
+			"test HTML PDF generation",
+			nil,
+			html,
+			true,
 		},
 	}
 	for _, tc := range tests {
@@ -32,39 +39,37 @@ func TestNew(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			d := New(tc.ext)
-			defer d.Close()
-			assert.IsType(t, new(director.Director), d, "expected to be a Director")
+			if tc.testErr {
+				defer func() {
+					assert.NotNil(t, recover())
+				}()
+			}
+
+			err := Generate(tc.html, *tc.pdfConfig, "test.pdf")
+			assert.NoError(t, err)
 		})
 	}
 }
 
-func TestConvertWebpage(t *testing.T) {
-	url := "https://www.example.com"
-
+func TestNewHandler(t *testing.T) {
 	tests := []struct {
-		name   string
-		ext    internal.Ext
-		url    string
-		output string
+		name             string
+		pdfConfig        *proto.PagePrintToPDF
+		screenshotConfig *proto.PageCaptureScreenshot
 	}{
 		{
-			"test PDF",
-			PDF,
-			url,
-			"test.pdf",
+			"test ScreenshotHandler",
+			nil,
+			&proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatPng,
+			},
 		},
 		{
-			"test PNG",
-			PNG,
-			url,
-			"test.png",
-		},
-		{
-			"test JPEG",
-			JPEG,
-			url,
-			"test.jpeg",
+			"test PDFHandler",
+			&proto.PagePrintToPDF{
+				PrintBackground: true,
+			},
+			nil,
 		},
 	}
 	for _, tc := range tests {
@@ -72,10 +77,15 @@ func TestConvertWebpage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := ConvertWebpage(tc.ext, tc.url, tc.output)
-			assert.NoError(t, err)
-
-			os.Remove(tc.output)
+			if tc.pdfConfig != nil {
+				handler := NewHandler(*tc.pdfConfig)
+				assert.IsType(t, &pdf.PDFHandler{}, handler, "expected to be a PDFHandler")
+			} else if tc.screenshotConfig != nil {
+				handler := NewHandler(*tc.screenshotConfig)
+				assert.IsType(t, &screenshot.ScreenshotHandler{}, handler, "expected to be a ScreenshotHandler")
+			} else {
+				assert.Fail(t, "expected a valid config")
+			}
 		})
 	}
 }
@@ -84,28 +94,45 @@ func TestConvertHTML(t *testing.T) {
 	html, _ := os.ReadFile("testdata/test.html")
 
 	tests := []struct {
-		name   string
-		ext    internal.Ext
-		html   []byte
-		output string
+		name              string
+		pdfHandler        handlers.FileHandler[proto.PagePrintToPDF]
+		screenshotHandler handlers.FileHandler[proto.PageCaptureScreenshot]
+		html              []byte
+		output            string
 	}{
 		{
 			"test PDF",
-			PDF,
+			NewHandler(proto.PagePrintToPDF{}),
+			nil,
 			html,
 			"test.pdf",
 		},
 		{
 			"test PNG",
-			PNG,
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatPng,
+			}),
 			html,
 			"test.png",
 		},
 		{
 			"test JPEG",
-			JPEG,
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatJpeg,
+			}),
 			html,
 			"test.jpeg",
+		},
+		{
+			"test WEBP",
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatWebp,
+			}),
+			html,
+			"test.webp",
 		},
 	}
 	for _, tc := range tests {
@@ -113,8 +140,88 @@ func TestConvertHTML(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := ConvertHTML(tc.ext, tc.html, tc.output)
+			var err error
+			var fi *fileinfo.Fileinfo
+
+			if tc.pdfHandler != nil {
+				fi, err = ConvertHTML(tc.pdfHandler, tc.html)
+			} else if tc.screenshotHandler != nil {
+				fi, err = ConvertHTML(tc.screenshotHandler, tc.html)
+			} else {
+				assert.Fail(t, "expected a valid handler")
+			}
+
 			assert.NoError(t, err)
+			assert.IsType(t, &fileinfo.Fileinfo{}, fi, "expected to be a Fileinfo")
+
+			os.Remove(tc.output)
+		})
+	}
+}
+
+func TestConvertWebpage(t *testing.T) {
+	url := "https://www.example.com"
+
+	tests := []struct {
+		name              string
+		pdfHandler        handlers.FileHandler[proto.PagePrintToPDF]
+		screenshotHandler handlers.FileHandler[proto.PageCaptureScreenshot]
+		url               string
+		output            string
+	}{
+		{
+			"test PDF",
+			NewHandler(proto.PagePrintToPDF{}),
+			nil,
+			url,
+			"test.pdf",
+		},
+		{
+			"test PNG",
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatPng,
+			}),
+			url,
+			"test.png",
+		},
+		{
+			"test JPEG",
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatJpeg,
+			}),
+			url,
+			"test.jpeg",
+		},
+		{
+			"test WEBP",
+			nil,
+			NewHandler(proto.PageCaptureScreenshot{
+				Format: proto.PageCaptureScreenshotFormatWebp,
+			}),
+			url,
+			"test.webp",
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			var err error
+			var fi *fileinfo.Fileinfo
+
+			if tc.pdfHandler != nil {
+				fi, err = ConvertWebpage(tc.pdfHandler, tc.url)
+			} else if tc.screenshotHandler != nil {
+				fi, err = ConvertWebpage(tc.screenshotHandler, tc.url)
+			} else {
+				assert.Fail(t, "expected a valid handler")
+			}
+
+			assert.NoError(t, err)
+			assert.IsType(t, &fileinfo.Fileinfo{}, fi, "expected to be a Fileinfo")
 
 			os.Remove(tc.output)
 		})

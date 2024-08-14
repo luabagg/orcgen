@@ -1,10 +1,3 @@
-# Go parameters
-GOCMD=go
-GORUN= $(GOCMD) run
-GOTEST=$(GOCMD) test
-GOCOVER= $(GOCMD) tool cover
-GOCLEAN= $(GOCMD) clean
-
 # Test
 TEST_FLAGS=-race
 
@@ -19,16 +12,16 @@ all: test cover
 
 test:
 	@echo "Running tests..."
-	$(GOTEST) -v $(TEST_FLAGS) ./...
+	go test -v $(TEST_FLAGS) ./...
 
 cover:
 	@echo "Calculating coverage..."
-	$(GOTEST) -v -coverprofile=$(COVERAGE_FILE) ./...
-	$(GOCOVER) -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
+	go test -v -coverprofile=$(COVERAGE_FILE) ./...
+	go tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
 
 clean:
 	@echo "Cleaning up..."
-	@$(GOCLEAN) $(CLEAN_FLAGS)
+	go clean $(CLEAN_FLAGS)
 	@rm -f $(COVERAGE_FILE) $(COVERAGE_HTML)
 
 .PHONY: all test cover clean

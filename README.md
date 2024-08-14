@@ -1,15 +1,32 @@
 # Orcgen
-Orcgen is a Go package that enables the conversion of web pages and HTML content to various file formats like PDF, PNG, and JPEG. It provides an easy-to-use interface for generating these file formats from web pages and HTML.
 
-## Functionalities
+Orcgen is a Go package that enables an easy-to-use conversion of web pages and HTML content to various file formats like PDF, PNG, and JPEG.
+The underlying implementation uses the [Rod library](https://github.com/go-rod/rod) for the page conversion.
+
+## Functionalities and packages
+
 Orcgen provides the following functionalities:
-- Conversion of HTML content to PDF, PNG, and JPEG files.
-- Conversion of web pages to PDF, PNG, and JPEG files.
-- The package provides functions to convert HTML content and web pages to the desired file format.
-- The ability to configure the conversion process by setting parameters like load timeout and page idle time.
-- The package supports the creation of full-page screenshots of web pages.
+
+- Conversion of web pages and HTML content to a static file (PNG, PDF...).
+
+  - This can be done simply using the Generate function, but if you need
+  prior configuration, you can access all the webdriver functionalities.
+  - You can also use the other functions at orcgen.go, as specified in the examples page.
+
+### Package folder
+
+- FileInfo:
+    A struct to standardize the returns and file saves.
+    There's a Output function that writes the content to a output file.
+
+- Handlers:
+    The implementations of the page file save functionality (PDF / Screenshots).
+
+- Webdriver:
+    Simple wrapper over rod library.
 
 ## Installation
+
 To use Orcgen, you can install it via Go modules:
 
 ```sh
@@ -22,10 +39,13 @@ Then you can import it in your Go code:
     import "github.com/luabagg/orcgen"
 ```
 
-## Example Usage
+## Usage Example
+
 The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen.
+It's the way-to-go if you're trying to use this package for the first time.
 
 You can see it in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
 
 ## Contributors
+
 This project is an open-source project, and contributions from other developers are welcome. If you encounter any issues or have suggestions for improvement, please submit them on the project's GitHub page.
