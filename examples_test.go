@@ -14,8 +14,8 @@ import (
 	"github.com/luabagg/orcgen/pkg/webdriver"
 )
 
-// ExampleCompleteConfiguration is an example of how to use the package structs directly.
-func ExampleCompleteConfiguration() {
+// Example contains examples of how to use the package structs directly.
+func Example() {
 	screenshotHandler := screenshot.New()
 	screenshotHandler.SetFullPage(false)
 
@@ -27,6 +27,7 @@ func ExampleCompleteConfiguration() {
 	page.MustInsertText("github orcgen package golang").Keyboard.Type(input.Enter)
 	wd.WaitLoad(page)
 
+	// Using the handler directly:
 	filename := "google.png"
 	fileinfo, err := screenshotHandler.GenerateFile(page)
 	if err == nil {
@@ -34,11 +35,24 @@ func ExampleCompleteConfiguration() {
 		fmt.Printf("%s generated successfully\n", filename)
 	}
 
+	// With NewHandler function:
+	filename = "google.pdf"
+	fileinfo, err = orcgen.NewHandler(proto.PagePrintToPDF{
+		PrintBackground: true,
+		PageRanges:      "1,2",
+	}).GenerateFile(page)
+
+	if err == nil {
+		fileinfo.Output(getName(filename))
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
 	// Output:
 	// google.png generated successfully
+	// google.pdf generated successfully
 }
 
-// ExampleConvertWebpage gives examples using the ConvertWebpage function.
+// ExampleGenerate uses the Generate function to write to the output.
 func ExampleGenerate() {
 	// Converting the GitHub homepage to a webp file.
 	filename := "github.webp"

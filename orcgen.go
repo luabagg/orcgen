@@ -38,7 +38,7 @@ func Generate[T string | []byte, Config handlers.Config](html T, config Config, 
 // NewHandler creates a handler from the config.
 //
 // It checks the config type and instanciates the handler accordingly.
-func NewHandler[T handlers.Config](config T) handlers.FileHandler[T] {
+func NewHandler[Config handlers.Config](config Config) handlers.FileHandler[Config] {
 	var handler any
 
 	if _, ok := any(config).(proto.PagePrintToPDF); ok {
@@ -46,10 +46,10 @@ func NewHandler[T handlers.Config](config T) handlers.FileHandler[T] {
 	} else if _, ok := any(config).(proto.PageCaptureScreenshot); ok {
 		handler = screenshot.New()
 	} else {
-		return nil
+		panic("invalid config type provided")
 	}
 
-	return any(handler).(handlers.FileHandler[T]).SetConfig(config)
+	return any(handler).(handlers.FileHandler[Config]).SetConfig(config)
 }
 
 // ConvertHTML converts the bytes using the given handler, and returns a Fileinfo object.
@@ -58,7 +58,7 @@ func NewHandler[T handlers.Config](config T) handlers.FileHandler[T] {
 // html is the html byte array (if it's a filepath, use os.ReadFile(filepath)).
 //
 // The connection with the Browser is automatically closed.
-func ConvertHTML[T handlers.Config](handler handlers.FileHandler[T], html []byte) (*fileinfo.Fileinfo, error) {
+func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], html []byte) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
@@ -77,7 +77,7 @@ func ConvertHTML[T handlers.Config](handler handlers.FileHandler[T], html []byte
 // url will be converted as configured, if you need special treats, check the Webdriver docs.
 //
 // The connection with the Browser is automatically closed.
-func ConvertWebpage[T handlers.Config](handler handlers.FileHandler[T], url string) (*fileinfo.Fileinfo, error) {
+func ConvertWebpage[Config handlers.Config](handler handlers.FileHandler[Config], url string) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
