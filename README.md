@@ -41,12 +41,10 @@ Then you can import it in your Go code:
 
 ## Usage Example
 
-The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen.
-It's the way-to-go if you're trying to use this package for the first time.
-
 ```go
     import "github.com/luabagg/orcgen"
 
+    // Webpage conversion
     orcgen.Generate(
         "https://www.github.com",
         proto.PageCaptureScreenshot{
@@ -54,9 +52,22 @@ It's the way-to-go if you're trying to use this package for the first time.
         },
         "github.webp",
     )
+
+    // HTML conversion
+    orcgen.Generate(
+        []byte("my html"),
+        proto.PagePrintToPDF{
+            Landscape:         true,
+            PrintBackground:   true,
+            PreferCSSPageSize: true,
+        },
+        "html.pdf",
+    )
 ```
 
-You can more in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
+The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen. It's the way-to-go if you're trying to use this package for the first time.
+
+You can see more in [examples_test.go](https://github.com/luabagg/orcgen/tree/main/examples_test.go) page.
 
 ## Contributors
 
