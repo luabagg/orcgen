@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orcgen/pkg/fileinfo"
-	"github.com/luabagg/orcgen/pkg/handlers"
-	"github.com/luabagg/orcgen/pkg/handlers/pdf"
-	"github.com/luabagg/orcgen/pkg/handlers/screenshot"
+	"github.com/luabagg/orcgen/v2/pkg/fileinfo"
+	"github.com/luabagg/orcgen/v2/pkg/handlers"
+	"github.com/luabagg/orcgen/v2/pkg/handlers/pdf"
+	"github.com/luabagg/orcgen/v2/pkg/handlers/screenshot"
 	"github.com/stretchr/testify/assert"
 )
 

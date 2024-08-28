@@ -30,19 +30,19 @@ Orcgen provides the following functionalities:
 To use Orcgen, you can install it via Go modules:
 
 ```sh
-    go get github.com/luabagg/orcgen
+    go get github.com/luabagg/orcgen/v2
 ```
 
 Then you can import it in your Go code:
 
 ```go
-    import "github.com/luabagg/orcgen"
+    import "github.com/luabagg/orcgen/v2"
 ```
 
 ## Usage Example
 
 ```go
-    import "github.com/luabagg/orcgen"
+    import "github.com/luabagg/orcgen/v2"
 
     // Webpage conversion
     orcgen.Generate(

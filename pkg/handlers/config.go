@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orcgen/pkg/fileinfo"
+	"github.com/luabagg/orcgen/v2/pkg/fileinfo"
 )
 
 type Config interface {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orcgen/pkg/handlers"
+	"github.com/luabagg/orcgen/v2/pkg/handlers"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
-	"github.com/luabagg/orcgen/internal"
+	"github.com/luabagg/orcgen/v2/internal"
 )
 
 type WebDriverConfig struct {

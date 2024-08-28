@@ -4,8 +4,8 @@ package screenshot
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orcgen/pkg/fileinfo"
-	"github.com/luabagg/orcgen/pkg/handlers"
+	"github.com/luabagg/orcgen/v2/pkg/fileinfo"
+	"github.com/luabagg/orcgen/v2/pkg/handlers"
 )
 
 // ScreenshotHandler struct.

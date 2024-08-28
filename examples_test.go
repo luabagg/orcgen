@@ -8,13 +8,13 @@ import (
 
 	"github.com/go-rod/rod/lib/input"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/luabagg/orcgen"
-	"github.com/luabagg/orcgen/pkg/handlers/pdf"
-	"github.com/luabagg/orcgen/pkg/handlers/screenshot"
-	"github.com/luabagg/orcgen/pkg/webdriver"
+	"github.com/luabagg/orcgen/v2"
+	"github.com/luabagg/orcgen/v2/pkg/handlers/pdf"
+	"github.com/luabagg/orcgen/v2/pkg/handlers/screenshot"
+	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 )
 
-// Example contains examples of how to use the package structs directly.
+// Examples of how to use the package structs directly.
 func Example() {
 	screenshotHandler := screenshot.New()
 	screenshotHandler.SetFullPage(false)
@@ -22,27 +22,31 @@ func Example() {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
+	// Using the page directly to search before screnshotting:
 	page := wd.UrlToPage("https://google.com")
 	wd.WaitLoad(page)
 	page.MustInsertText("github orcgen package golang").Keyboard.Type(input.Enter)
 	wd.WaitLoad(page)
 
-	// Using the handler directly:
-	filename := "google.png"
+	// Using the handler directly - creates a PNG of the Google search:
 	fileinfo, err := screenshotHandler.GenerateFile(page)
 	if err == nil {
+		// Output must be called to create a new file.
+		filename := "google.png"
 		fileinfo.Output(getName(filename))
 		fmt.Printf("%s generated successfully\n", filename)
 	}
 
-	// With NewHandler function:
-	filename = "google.pdf"
+	// With NewHandler function - creates a PDF of the Google search:
+	// It will not check the extension, so make sure to use the correct one.
+	// e.g: if you use a PagePrintToPDF config, the output must be a PDF file.
 	fileinfo, err = orcgen.NewHandler(proto.PagePrintToPDF{
 		PrintBackground: true,
 		PageRanges:      "1,2",
 	}).GenerateFile(page)
 
 	if err == nil {
+		filename := "google.pdf"
 		fileinfo.Output(getName(filename))
 		fmt.Printf("%s generated successfully\n", filename)
 	}
