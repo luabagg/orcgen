@@ -47,8 +47,8 @@ Then you can import it in your Go code:
     // Webpage conversion
     orcgen.Generate(
         "https://www.github.com",
-        proto.PageCaptureScreenshot{
-            Format: proto.PageCaptureScreenshotFormatWebp,
+        orcgen.ScreenshotConfig{
+            Format: "webp",
         },
         "github.webp",
     )
@@ -56,7 +56,7 @@ Then you can import it in your Go code:
     // HTML conversion
     orcgen.Generate(
         []byte("my html"),
-        proto.PagePrintToPDF{
+        orcgen.PDFConfig{
             Landscape:         true,
             PrintBackground:   true,
             PreferCSSPageSize: true,

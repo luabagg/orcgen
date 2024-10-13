@@ -6,6 +6,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/luabagg/orcgen/v2/pkg/handlers"
+	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,8 +60,7 @@ func TestScreenshotHandler_SetFullPage(t *testing.T) {
 
 func TestScreenshotHandler_GenerateFile(t *testing.T) {
 	// create a new browser instance
-	b := rod.New().MustConnect()
-	defer b.MustClose()
+	wd := webdriver.FromDefault()
 
 	// create a new ScreenshotHandler instance
 	screenshotHandler := New()
@@ -73,27 +73,26 @@ func TestScreenshotHandler_GenerateFile(t *testing.T) {
 		{
 			name:     "simple page",
 			instance: screenshotHandler,
-			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
+			input:    wd.UrlToPage("https://www.example.com"),
 		},
 		{
 			name:     "fullpage",
-			instance: screenshotHandler,
-			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
+			instance: screenshotHandler.SetFullPage(true),
+			input:    wd.UrlToPage("https://www.google.com"),
 		},
 		{
 			instance: screenshotHandler,
-			input:    b.MustPage(),
+			input:    wd.Browser.MustPage(),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// generate the JPEG file
+			wd.WaitLoad(tc.input)
 			jpegData, err := tc.instance.GenerateFile(tc.input)
 
 			assert.NoError(t, err, "Expected no error")
 			assert.NotEmpty(t, jpegData, "Expected bytes")
-
-			tc.input.MustClose()
 		})
 	}
 }

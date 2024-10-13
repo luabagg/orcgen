@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"github.com/go-rod/rod/lib/input"
-	"github.com/go-rod/rod/lib/proto"
 	"github.com/luabagg/orcgen/v2"
 	"github.com/luabagg/orcgen/v2/pkg/handlers/pdf"
 	"github.com/luabagg/orcgen/v2/pkg/handlers/screenshot"
@@ -40,7 +39,7 @@ func Example() {
 	// With NewHandler function - creates a PDF of the Google search:
 	// It will not check the extension, so make sure to use the correct one.
 	// e.g: if you use a PagePrintToPDF config, the output must be a PDF file.
-	fileinfo, err = orcgen.NewHandler(proto.PagePrintToPDF{
+	fileinfo, err = orcgen.NewHandler(orcgen.PDFConfig{
 		PrintBackground: true,
 		PageRanges:      "1,2",
 	}).GenerateFile(page)
@@ -62,8 +61,8 @@ func ExampleGenerate() {
 	filename := "github.webp"
 	err := orcgen.Generate(
 		"https://www.github.com",
-		proto.PageCaptureScreenshot{
-			Format: proto.PageCaptureScreenshotFormatWebp,
+		orcgen.ScreenshotConfig{
+			Format: "webp",
 		},
 		getName(filename),
 	)
@@ -75,7 +74,7 @@ func ExampleGenerate() {
 	filename = "html.pdf"
 	err = orcgen.Generate(
 		getHTML(),
-		proto.PagePrintToPDF{
+		orcgen.PDFConfig{
 			Landscape:           true,
 			DisplayHeaderFooter: true,
 			PrintBackground:     true,
@@ -99,14 +98,12 @@ func ExampleGenerate() {
 // ExampleNewHandler shows how to use ExampleNewHandler function to create a new handler.
 func ExampleNewHandler() {
 	screenshotHandler := orcgen.NewHandler(
-		proto.PageCaptureScreenshot{
-			Format: proto.PageCaptureScreenshotFormatWebp,
-		},
+		orcgen.ScreenshotConfig{},
 	)
 	screenshotHandler.SetFullPage(true)
 
 	pdfHandler := orcgen.NewHandler(
-		proto.PagePrintToPDF{
+		orcgen.PDFConfig{
 			PrintBackground: false,
 		},
 	)
@@ -147,8 +144,8 @@ func ExampleConvertHTML() {
 	// Converting the HTML file to a JPG file.
 	filename := "html.jpg"
 	fileinfo, err := orcgen.ConvertHTML(
-		screenshot.New().SetConfig(proto.PageCaptureScreenshot{
-			Format: proto.PageCaptureScreenshotFormatJpeg,
+		screenshot.New().SetConfig(orcgen.ScreenshotConfig{
+			Format: "jpeg",
 		}),
 		getHTML(),
 	)
@@ -166,7 +163,7 @@ func ExampleConvertHTML() {
 	}
 
 	// Output:
-	// html.webp generated successfully
+	// html.jpg generated successfully
 	// html.pdf generated successfully
 }
 

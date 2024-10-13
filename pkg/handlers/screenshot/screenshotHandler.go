@@ -21,6 +21,13 @@ func New() handlers.FileHandler[proto.PageCaptureScreenshot] {
 	handler := &ScreenshotHandler{
 		fullPage: false,
 	}
+	handler.SetConfig(proto.PageCaptureScreenshot{
+		Format:                "png",
+		Quality:               new(int),
+		FromSurface:           false,
+		CaptureBeyondViewport: false,
+		OptimizeForSpeed:      false,
+	})
 
 	return handler
 }
@@ -41,7 +48,7 @@ func (s *ScreenshotHandler) SetFullPage(fullPage bool) handlers.FileHandler[prot
 	return s
 }
 
-// GenerateFile converts a rod Page instance to a JPEG file.
+// GenerateFile converts a rod Page instance to an image file.
 func (s *ScreenshotHandler) GenerateFile(page *rod.Page) (*fileinfo.Fileinfo, error) {
 	r, err := page.Screenshot(s.fullPage, s.config)
 	if err != nil {

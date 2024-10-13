@@ -17,13 +17,13 @@ func TestGenerator(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		pdfConfig *proto.PagePrintToPDF
+		pdfConfig *PDFConfig
 		html      []byte
 		testErr   bool
 	}{
 		{
 			"test HTML PDF generation",
-			&proto.PagePrintToPDF{},
+			&PDFConfig{},
 			html,
 			false,
 		},
@@ -54,19 +54,19 @@ func TestGenerator(t *testing.T) {
 func TestNewHandler(t *testing.T) {
 	tests := []struct {
 		name             string
-		pdfConfig        *proto.PagePrintToPDF
-		screenshotConfig *proto.PageCaptureScreenshot
+		pdfConfig        *PDFConfig
+		screenshotConfig *ScreenshotConfig
 	}{
 		{
 			"test ScreenshotHandler",
 			nil,
-			&proto.PageCaptureScreenshot{
+			&ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatPng,
 			},
 		},
 		{
 			"test PDFHandler",
-			&proto.PagePrintToPDF{
+			&PDFConfig{
 				PrintBackground: true,
 			},
 			nil,
@@ -95,14 +95,14 @@ func TestConvertHTML(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		pdfHandler        handlers.FileHandler[proto.PagePrintToPDF]
-		screenshotHandler handlers.FileHandler[proto.PageCaptureScreenshot]
+		pdfHandler        handlers.FileHandler[PDFConfig]
+		screenshotHandler handlers.FileHandler[ScreenshotConfig]
 		html              []byte
 		output            string
 	}{
 		{
 			"test PDF",
-			NewHandler(proto.PagePrintToPDF{}),
+			NewHandler(PDFConfig{}),
 			nil,
 			html,
 			"test.pdf",
@@ -110,7 +110,7 @@ func TestConvertHTML(t *testing.T) {
 		{
 			"test PNG",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatPng,
 			}),
 			html,
@@ -119,7 +119,7 @@ func TestConvertHTML(t *testing.T) {
 		{
 			"test JPEG",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatJpeg,
 			}),
 			html,
@@ -128,7 +128,7 @@ func TestConvertHTML(t *testing.T) {
 		{
 			"test WEBP",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatWebp,
 			}),
 			html,
@@ -164,14 +164,14 @@ func TestConvertWebpage(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		pdfHandler        handlers.FileHandler[proto.PagePrintToPDF]
-		screenshotHandler handlers.FileHandler[proto.PageCaptureScreenshot]
+		pdfHandler        handlers.FileHandler[PDFConfig]
+		screenshotHandler handlers.FileHandler[ScreenshotConfig]
 		url               string
 		output            string
 	}{
 		{
 			"test PDF",
-			NewHandler(proto.PagePrintToPDF{}),
+			NewHandler(PDFConfig{}),
 			nil,
 			url,
 			"test.pdf",
@@ -179,7 +179,7 @@ func TestConvertWebpage(t *testing.T) {
 		{
 			"test PNG",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatPng,
 			}),
 			url,
@@ -188,7 +188,7 @@ func TestConvertWebpage(t *testing.T) {
 		{
 			"test JPEG",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatJpeg,
 			}),
 			url,
@@ -197,7 +197,7 @@ func TestConvertWebpage(t *testing.T) {
 		{
 			"test WEBP",
 			nil,
-			NewHandler(proto.PageCaptureScreenshot{
+			NewHandler(ScreenshotConfig{
 				Format: proto.PageCaptureScreenshotFormatWebp,
 			}),
 			url,

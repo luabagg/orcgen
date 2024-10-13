@@ -14,6 +14,10 @@ import (
 	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 )
 
+// Aliases:
+type ScreenshotConfig = proto.PageCaptureScreenshot
+type PDFConfig = proto.PagePrintToPDF
+
 // Generate generates a file from the given HTML / URL and outputs it to the given path.
 //
 // There's no checking in the extension type, so make sure to use the correct one.
@@ -41,9 +45,9 @@ func Generate[T string | []byte, Config handlers.Config](html T, config Config, 
 func NewHandler[Config handlers.Config](config Config) handlers.FileHandler[Config] {
 	var handler any
 
-	if _, ok := any(config).(proto.PagePrintToPDF); ok {
+	if _, ok := any(config).(PDFConfig); ok {
 		handler = pdf.New()
-	} else if _, ok := any(config).(proto.PageCaptureScreenshot); ok {
+	} else if _, ok := any(config).(ScreenshotConfig); ok {
 		handler = screenshot.New()
 	} else {
 		panic("invalid config type provided")

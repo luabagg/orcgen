@@ -57,7 +57,6 @@ func (r *WebDriver) Close() {
 
 // UrlToPage converts the URL to a rod Page instance.
 func (r *WebDriver) UrlToPage(url string) *rod.Page {
-	rod.Try(func() { r.Browser.MustPage(url) })
 	return r.Browser.MustPage(url)
 }
 

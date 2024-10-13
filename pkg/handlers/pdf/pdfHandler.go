@@ -25,10 +25,6 @@ func New() handlers.FileHandler[proto.PagePrintToPDF] {
 		Landscape:           true,
 		DisplayHeaderFooter: true,
 		PrintBackground:     true,
-		MarginTop:           new(float64),
-		MarginBottom:        new(float64),
-		MarginLeft:          new(float64),
-		MarginRight:         new(float64),
 		PreferCSSPageSize:   true,
 	})
 

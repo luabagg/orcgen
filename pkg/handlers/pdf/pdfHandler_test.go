@@ -6,6 +6,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/luabagg/orcgen/v2/pkg/handlers"
+	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,8 +60,8 @@ func TestPDFHandler_SetFullPage(t *testing.T) {
 
 func TestPDFHandler_GenerateFile(t *testing.T) {
 	// create a new browser instance
-	b := rod.New().MustConnect()
-	defer b.MustClose()
+	wd := webdriver.FromDefault()
+	defer wd.Close()
 
 	// create a new PDFHandler instance
 	pdfHandler := New()
@@ -73,27 +74,26 @@ func TestPDFHandler_GenerateFile(t *testing.T) {
 		{
 			name:     "simple page",
 			instance: pdfHandler,
-			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
+			input:    wd.UrlToPage("https://www.example.com"),
 		},
 		{
 			name:     "fullpage",
 			instance: pdfHandler.SetFullPage(true),
-			input:    b.MustPage("https://www.example.com").MustWaitLoad(),
+			input:    wd.UrlToPage("https://www.example.com"),
 		},
 		{
 			instance: pdfHandler,
-			input:    b.MustPage(),
+			input:    wd.Browser.MustPage(),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// generate the PDF file
+			wd.WaitLoad(tc.input)
 			pdfData, err := tc.instance.GenerateFile(tc.input)
 
 			assert.NoError(t, err, "Expected no error")
 			assert.NotEmpty(t, pdfData, "Expected bytes")
-
-			tc.input.MustClose()
 		})
 	}
 }
