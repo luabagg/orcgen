@@ -3,7 +3,7 @@ module github.com/luabagg/orcgen/v2
 go 1.22.2
 
 require (
-	github.com/go-rod/rod v0.115.0
+	github.com/go-rod/rod v0.116.0
 	github.com/stretchr/testify v1.9.0
 )
 
