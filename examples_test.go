@@ -13,6 +13,77 @@ import (
 	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 )
 
+// ExampleGenerateHTML_new demonstrates the new recommended API using the builder pattern.
+// This approach eliminates runtime type assertions and provides compile-time type safety.
+func ExampleGenerateHTML_new() {
+	// Converting HTML bytes to a PDF file with full page capture
+	filename := "html_new.pdf"
+	err := orcgen.GenerateHTML(
+		getHTML(),
+		orcgen.PDF(orcgen.PDFConfig{
+			Landscape:           true,
+			DisplayHeaderFooter: true,
+			PrintBackground:     true,
+			PreferCSSPageSize:   true,
+		}).FullPage(true),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Converting HTML bytes to a screenshot
+	filename = "html_new.png"
+	err = orcgen.GenerateHTML(
+		getHTML(),
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
+			Format: "png",
+		}),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Output:
+	// html_new.pdf generated successfully
+	// html_new.png generated successfully
+}
+
+// ExampleGenerateURL_new demonstrates the new recommended API for URL conversion.
+func ExampleGenerateURL_new() {
+	// Converting a URL to a PDF
+	filename := "github_new.pdf"
+	err := orcgen.GenerateURL(
+		"https://www.github.com",
+		orcgen.PDF(orcgen.PDFConfig{
+			Landscape:       true,
+			PrintBackground: true,
+		}),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Converting a URL to a WebP screenshot with full page
+	filename = "github_new.webp"
+	err = orcgen.GenerateURL(
+		"https://www.github.com",
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
+			Format: "webp",
+		}).FullPage(true),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Output:
+	// github_new.pdf generated successfully
+	// github_new.webp generated successfully
+}
+
 // Examples of how to use the package structs directly.
 func Example() {
 	screenshotHandler := screenshot.New()
