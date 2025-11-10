@@ -87,7 +87,6 @@ func GenerateHTML(html []byte, builder *HandlerBuilder, output string) error {
 
 // GenerateURL generates a file from a URL and outputs it to the given path.
 //
-// This is the recommended way to generate files from URLs.
 // Example:
 //
 //	err := orcgen.GenerateURL("https://example.com",
@@ -108,56 +107,14 @@ func GenerateURL(url string, builder *HandlerBuilder, output string) error {
 	return fileinfo.Output(output)
 }
 
-// Generate generates a file from the given HTML / URL and outputs it to the given path.
-//
-// Deprecated: Use GenerateHTML or GenerateURL instead for better type safety.
-//
-// There's no checking in the extension type, so make sure to use the correct one.
-func Generate[T string | []byte, Config handlers.Config](html T, config Config, output string) error {
-	handler := NewHandler(config)
-
-	var fileinfo *fileinfo.Fileinfo
-	var err error
-
-	if _, ok := any(html).([]byte); ok {
-		fileinfo, err = ConvertHTML(handler, any(html).([]byte))
-	} else {
-		fileinfo, err = ConvertWebpage(handler, any(html).(string))
-	}
-
-	if err != nil {
-		return err
-	}
-	return fileinfo.Output(output)
-}
-
-// NewHandler creates a handler from the config.
-//
-// Deprecated: Use PDF() or Screenshot() factory functions instead for better type safety
-// and to avoid runtime type assertions.
-//
-// It checks the config type and instanciates the handler accordingly.
-func NewHandler[Config handlers.Config](config Config) handlers.FileHandler[Config] {
-	var handler any
-
-	if _, ok := any(config).(PDFConfig); ok {
-		handler = pdf.New()
-	} else if _, ok := any(config).(ScreenshotConfig); ok {
-		handler = screenshot.New()
-	} else {
-		panic("invalid config type provided")
-	}
-
-	return any(handler).(handlers.FileHandler[Config]).SetConfig(config)
-}
-
-// ConvertHTML converts the bytes using the given handler, and returns a Fileinfo object.
-//
-// handler is a Handler instance (see pkg/handlers).
-// html is the html byte array (if it's a filepath, use os.ReadFile(filepath)).
+// ConvertHTML converts HTML bytes using the given handler builder, and returns a Fileinfo object.
 //
 // The connection with the Browser is automatically closed.
-func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], html []byte) (*fileinfo.Fileinfo, error) {
+//
+// Example:
+//
+//	fi, err := orcgen.ConvertHTML(orcgen.PDF(config), htmlBytes)
+func ConvertHTML(builder *HandlerBuilder, html []byte) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
@@ -167,21 +124,22 @@ func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], h
 	}
 	wd.WaitLoad(page)
 
-	return handler.GenerateFile(page)
+	return builder.handler.GenerateFile(page)
 }
 
-// ConvertWebpage converts the url using the given handler, and returns a Fileinfo object
-//
-// handler is a Handler instance (see pkg/handlers).
-// url will be converted as configured, if you need special treats, check the Webdriver docs.
+// ConvertURL converts a URL using the given handler builder, and returns a Fileinfo object.
 //
 // The connection with the Browser is automatically closed.
-func ConvertWebpage[Config handlers.Config](handler handlers.FileHandler[Config], url string) (*fileinfo.Fileinfo, error) {
+//
+// Example:
+//
+//	fi, err := orcgen.ConvertURL(orcgen.Screenshot(config), "https://example.com")
+func ConvertURL(builder *HandlerBuilder, url string) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
 	page := wd.UrlToPage(url)
 	wd.WaitLoad(page)
 
-	return handler.GenerateFile(page)
+	return builder.handler.GenerateFile(page)
 }

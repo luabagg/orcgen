@@ -41,10 +41,6 @@ Then you can import it in your Go code:
 
 ## Usage Example
 
-### New API (Recommended)
-
-The new API uses explicit factory functions and provides compile-time type safety without runtime type assertions:
-
 ```go
 import "github.com/luabagg/orcgen/v2"
 
@@ -68,26 +64,15 @@ err = orcgen.GenerateHTML(
     }),
     "output.pdf",
 )
-```
 
-### Legacy API (Deprecated)
-
-The old generic `Generate` function is still available for backward compatibility but is deprecated:
-
-```go
-// Deprecated: Use GenerateURL instead
-orcgen.Generate(
-    "https://www.github.com",
-    orcgen.ScreenshotConfig{Format: "webp"},
-    "github.webp",
+// Advanced: Use ConvertHTML/ConvertURL for more control
+fileInfo, err := orcgen.ConvertURL(
+    orcgen.PDF(orcgen.PDFConfig{Landscape: true}),
+    "https://example.com",
 )
-
-// Deprecated: Use GenerateHTML instead
-orcgen.Generate(
-    []byte("my html"),
-    orcgen.PDFConfig{Landscape: true},
-    "html.pdf",
-)
+if err == nil {
+    fileInfo.Output("custom.pdf")
+}
 ```
 
 The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen. It's the way-to-go if you're trying to use this package for the first time.
