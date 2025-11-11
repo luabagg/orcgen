@@ -38,7 +38,8 @@ func TestWebDriver_UrlToPage(t *testing.T) {
 	defer webDriver.Browser.Close()
 
 	// Call UrlToPage function to create a page instance
-	page := webDriver.UrlToPage("https://www.example.com")
+	page, err := webDriver.UrlToPage("https://www.example.com")
+	assert.NoError(t, err)
 	assert.NotNil(t, page)
 
 	// Check that the page has loaded successfully

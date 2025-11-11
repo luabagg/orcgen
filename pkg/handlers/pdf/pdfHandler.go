@@ -48,13 +48,14 @@ func (p *PDFHandler) SetFullPage(fullPage bool) handlers.FileHandler[proto.PageP
 
 // GenerateFile converts a rod Page instance to a PDF file.
 func (p *PDFHandler) GenerateFile(page *rod.Page) (*fileinfo.Fileinfo, error) {
-	if !p.fullPage && p.config.PageRanges == "" {
-		p.config.PageRanges = "1"
+	// Create a copy of the config to avoid mutation
+	config := *p.config
+
+	if !p.fullPage && config.PageRanges == "" {
+		config.PageRanges = "1"
 	}
 
-	r, err := page.PDF(
-		p.config,
-	)
+	r, err := page.PDF(&config)
 	if err != nil {
 		return nil, err
 	}

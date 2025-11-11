@@ -90,10 +90,20 @@ func Example() {
 	defer wd.Close()
 
 	// Using the page directly to search before screenshotting:
-	page := wd.UrlToPage("https://google.com")
-	wd.WaitLoad(page)
+	page, err := wd.UrlToPage("https://google.com")
+	if err != nil {
+		return
+	}
+
+	if err := wd.WaitLoad(page); err != nil {
+		return
+	}
+
 	page.MustInsertText("github orcgen package golang").Keyboard.Type(input.Enter)
-	wd.WaitLoad(page)
+
+	if err := wd.WaitLoad(page); err != nil {
+		return
+	}
 
 	// Using the handler directly - creates a PNG of the Google search:
 	screenshotHandler := screenshot.New().SetConfig(orcgen.ScreenshotConfig{

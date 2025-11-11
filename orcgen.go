@@ -75,7 +75,10 @@ func GenerateHTML(html []byte, builder *HandlerBuilder, output string) error {
 	if err != nil {
 		return err
 	}
-	wd.WaitLoad(page)
+
+	if err := wd.WaitLoad(page); err != nil {
+		return err
+	}
 
 	fileinfo, err := builder.handler.GenerateFile(page)
 	if err != nil {
@@ -96,8 +99,14 @@ func GenerateURL(url string, builder *HandlerBuilder, output string) error {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
-	page := wd.UrlToPage(url)
-	wd.WaitLoad(page)
+	page, err := wd.UrlToPage(url)
+	if err != nil {
+		return err
+	}
+
+	if err := wd.WaitLoad(page); err != nil {
+		return err
+	}
 
 	fileinfo, err := builder.handler.GenerateFile(page)
 	if err != nil {
@@ -122,7 +131,10 @@ func ConvertHTML(builder *HandlerBuilder, html []byte) (*fileinfo.Fileinfo, erro
 	if err != nil {
 		return nil, err
 	}
-	wd.WaitLoad(page)
+
+	if err := wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
 
 	return builder.handler.GenerateFile(page)
 }
@@ -138,8 +150,14 @@ func ConvertURL(builder *HandlerBuilder, url string) (*fileinfo.Fileinfo, error)
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
-	page := wd.UrlToPage(url)
-	wd.WaitLoad(page)
+	page, err := wd.UrlToPage(url)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
 
 	return builder.handler.GenerateFile(page)
 }
