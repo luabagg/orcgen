@@ -2,6 +2,8 @@ module github.com/luabagg/orcgen/v2
 
 go 1.24
 
+toolchain go1.24.4
+
 require (
 	github.com/go-rod/rod v0.116.0
 	github.com/stretchr/testify v1.9.0
