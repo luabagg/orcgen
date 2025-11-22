@@ -1,6 +1,6 @@
 module github.com/luabagg/orcgen/v2
 
-go 1.24
+go 1.22
 
 toolchain go1.24.4
 
