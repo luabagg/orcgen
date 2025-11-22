@@ -1,6 +1,6 @@
 module github.com/luabagg/orcgen/v2
 
-go 1.23
+go 1.24
 
 require (
 	github.com/go-rod/rod v0.116.0
