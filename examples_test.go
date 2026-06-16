@@ -13,37 +13,117 @@ import (
 	"github.com/luabagg/orcgen/v2/pkg/webdriver"
 )
 
-// Examples of how to use the package structs directly.
-func Example() {
-	screenshotHandler := screenshot.New()
-	screenshotHandler.SetFullPage(false)
+// ExampleGenerateHTML_new demonstrates the new recommended API using the builder pattern.
+// This approach eliminates runtime type assertions and provides compile-time type safety.
+func ExampleGenerateHTML_new() {
+	// Converting HTML bytes to a PDF file with full page capture
+	filename := "html_new.pdf"
+	err := orcgen.GenerateHTML(
+		getHTML(),
+		orcgen.PDF(orcgen.PDFConfig{
+			Landscape:           true,
+			DisplayHeaderFooter: true,
+			PrintBackground:     true,
+			PreferCSSPageSize:   true,
+		}).FullPage(true),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
 
+	// Converting HTML bytes to a screenshot
+	filename = "html_new.png"
+	err = orcgen.GenerateHTML(
+		getHTML(),
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
+			Format: "png",
+		}),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Output:
+	// html_new.pdf generated successfully
+	// html_new.png generated successfully
+}
+
+// ExampleGenerateURL_new demonstrates the new recommended API for URL conversion.
+func ExampleGenerateURL_new() {
+	// Converting a URL to a PDF
+	filename := "github_new.pdf"
+	err := orcgen.GenerateURL(
+		"https://www.github.com",
+		orcgen.PDF(orcgen.PDFConfig{
+			Landscape:       true,
+			PrintBackground: true,
+		}),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Converting a URL to a WebP screenshot with full page
+	filename = "github_new.webp"
+	err = orcgen.GenerateURL(
+		"https://www.github.com",
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
+			Format: "webp",
+		}).FullPage(true),
+		getName(filename),
+	)
+	if err == nil {
+		fmt.Printf("%s generated successfully\n", filename)
+	}
+
+	// Output:
+	// github_new.pdf generated successfully
+	// github_new.webp generated successfully
+}
+
+// Example demonstrates advanced usage with direct webdriver control.
+func Example() {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
-	// Using the page directly to search before screnshotting:
-	page := wd.UrlToPage("https://google.com")
-	wd.WaitLoad(page)
+	// Using the page directly to search before screenshotting:
+	page, err := wd.UrlToPage("https://google.com")
+	if err != nil {
+		return
+	}
+
+	if err := wd.WaitLoad(page); err != nil {
+		return
+	}
+
 	page.MustInsertText("github orcgen package golang").Keyboard.Type(input.Enter)
-	wd.WaitLoad(page)
+
+	if err := wd.WaitLoad(page); err != nil {
+		return
+	}
 
 	// Using the handler directly - creates a PNG of the Google search:
+	screenshotHandler := screenshot.New().SetConfig(orcgen.ScreenshotConfig{
+		Format: "png",
+	})
+
 	fileinfo, err := screenshotHandler.GenerateFile(page)
 	if err == nil {
-		// Output must be called to create a new file.
 		filename := "google.png"
 		fileinfo.Output(getName(filename))
 		fmt.Printf("%s generated successfully\n", filename)
 	}
 
-	// With NewHandler function - creates a PDF of the Google search:
-	// It will not check the extension, so make sure to use the correct one.
-	// e.g: if you use a PagePrintToPDF config, the output must be a PDF file.
-	fileinfo, err = orcgen.NewHandler(orcgen.PDFConfig{
+	// Creates a PDF of the Google search:
+	pdfHandler := pdf.New().SetConfig(orcgen.PDFConfig{
 		PrintBackground: true,
 		PageRanges:      "1,2",
-	}).GenerateFile(page)
+	})
 
+	fileinfo, err = pdfHandler.GenerateFile(page)
 	if err == nil {
 		filename := "google.pdf"
 		fileinfo.Output(getName(filename))
@@ -55,35 +135,15 @@ func Example() {
 	// google.pdf generated successfully
 }
 
-// ExampleGenerate uses the Generate function to write to the output.
-func ExampleGenerate() {
-	// Converting the GitHub homepage to a webp file.
+// ExampleGenerateURL demonstrates URL conversion with the fluent builder API.
+func ExampleGenerateURL() {
+	// Converting a URL to a WebP screenshot
 	filename := "github.webp"
-	err := orcgen.Generate(
+	err := orcgen.GenerateURL(
 		"https://www.github.com",
-		orcgen.ScreenshotConfig{
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
 			Format: "webp",
-		},
-		getName(filename),
-	)
-	if err == nil {
-		fmt.Printf("%s generated successfully\n", filename)
-	}
-
-	// Converting the HTML file to a PDF file.
-	filename = "html.pdf"
-	err = orcgen.Generate(
-		getHTML(),
-		orcgen.PDFConfig{
-			Landscape:           true,
-			DisplayHeaderFooter: true,
-			PrintBackground:     true,
-			MarginTop:           new(float64),
-			MarginBottom:        new(float64),
-			MarginLeft:          new(float64),
-			MarginRight:         new(float64),
-			PreferCSSPageSize:   true,
-		},
+		}),
 		getName(filename),
 	)
 	if err == nil {
@@ -92,46 +152,83 @@ func ExampleGenerate() {
 
 	// Output:
 	// github.webp generated successfully
-	// html.pdf generated successfully
 }
 
-// ExampleNewHandler shows how to use ExampleNewHandler function to create a new handler.
-func ExampleNewHandler() {
-	screenshotHandler := orcgen.NewHandler(
-		orcgen.ScreenshotConfig{},
+// ExampleGenerateHTML demonstrates HTML conversion with the fluent builder API.
+func ExampleGenerateHTML() {
+	// Converting HTML bytes to a PDF file
+	filename := "html.pdf"
+	err := orcgen.GenerateHTML(
+		getHTML(),
+		orcgen.PDF(orcgen.PDFConfig{
+			Landscape:           true,
+			DisplayHeaderFooter: true,
+			PrintBackground:     true,
+			MarginTop:           new(float64),
+			MarginBottom:        new(float64),
+			MarginLeft:          new(float64),
+			MarginRight:         new(float64),
+			PreferCSSPageSize:   true,
+		}),
+		getName(filename),
 	)
-	screenshotHandler.SetFullPage(true)
-
-	pdfHandler := orcgen.NewHandler(
-		orcgen.PDFConfig{
-			PrintBackground: false,
-		},
-	)
-	pdfHandler.SetFullPage(false)
-}
-
-// ExampleConvertWebpage gives examples using the ConvertWebpage function.
-func ExampleConvertWebpage() {
-	// Converting the Faceboox homepage to a PNG file.
-	filename := "facebook.png" // png is the default extension for screenshots.
-	fileinfo, err := orcgen.ConvertWebpage(
-		screenshot.New(), "https://www.facebook.com",
-	)
-
-	err = fileinfo.Output(getName(filename))
 	if err == nil {
 		fmt.Printf("%s generated successfully\n", filename)
 	}
 
-	// Converting the X homepage to a PDF file.
-	filename = "x.pdf"
-	fileinfo, err = orcgen.ConvertWebpage(
-		pdf.New().SetFullPage(true), "https://www.x.com",
+	// Output:
+	// html.pdf generated successfully
+}
+
+// ExampleHandlerBuilder demonstrates the builder pattern with method chaining.
+func ExampleHandlerBuilder() {
+	// Screenshot builder with full page enabled
+	screenshotBuilder := orcgen.Screenshot(orcgen.ScreenshotConfig{
+		Format: "png",
+	}).FullPage(true)
+
+	// PDF builder with full page disabled
+	pdfBuilder := orcgen.PDF(orcgen.PDFConfig{
+		PrintBackground: true,
+	}).FullPage(false)
+
+	// Use the builders
+	orcgen.GenerateURL("https://example.com", screenshotBuilder, getName("example.png"))
+	orcgen.GenerateHTML(getHTML(), pdfBuilder, getName("example.pdf"))
+}
+
+// ExampleConvertURL demonstrates using ConvertURL for more control.
+func ExampleConvertURL() {
+	// Converting a URL to a PNG file
+	filename := "facebook.png"
+	fileinfo, err := orcgen.ConvertURL(
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
+			Format: "png",
+		}),
+		"https://www.facebook.com",
 	)
 
-	err = fileinfo.Output(getName(filename))
 	if err == nil {
-		fmt.Printf("%s generated successfully\n", filename)
+		err = fileinfo.Output(getName(filename))
+		if err == nil {
+			fmt.Printf("%s generated successfully\n", filename)
+		}
+	}
+
+	// Converting a URL to a PDF file with full page
+	filename = "x.pdf"
+	fileinfo, err = orcgen.ConvertURL(
+		orcgen.PDF(orcgen.PDFConfig{
+			PrintBackground: true,
+		}).FullPage(true),
+		"https://www.x.com",
+	)
+
+	if err == nil {
+		err = fileinfo.Output(getName(filename))
+		if err == nil {
+			fmt.Printf("%s generated successfully\n", filename)
+		}
 	}
 
 	// Output:
@@ -139,27 +236,36 @@ func ExampleConvertWebpage() {
 	// x.pdf generated successfully
 }
 
-// ExampleConvertHTML gives examples using the ConvertHTML function.
+// ExampleConvertHTML demonstrates using ConvertHTML for more control.
 func ExampleConvertHTML() {
-	// Converting the HTML file to a JPG file.
+	// Converting HTML to a JPG file
 	filename := "html.jpg"
 	fileinfo, err := orcgen.ConvertHTML(
-		screenshot.New().SetConfig(orcgen.ScreenshotConfig{
+		orcgen.Screenshot(orcgen.ScreenshotConfig{
 			Format: "jpeg",
 		}),
 		getHTML(),
 	)
-	err = fileinfo.Output(getName(filename))
 	if err == nil {
-		fmt.Printf("%s generated successfully\n", filename)
+		err = fileinfo.Output(getName(filename))
+		if err == nil {
+			fmt.Printf("%s generated successfully\n", filename)
+		}
 	}
 
-	// Converting the HTML file to a PDF file.
+	// Converting HTML to a PDF file
 	filename = "html.pdf"
-	fileinfo, err = orcgen.ConvertHTML(pdf.New(), getHTML())
-	err = fileinfo.Output(getName(filename))
+	fileinfo, err = orcgen.ConvertHTML(
+		orcgen.PDF(orcgen.PDFConfig{
+			PrintBackground: true,
+		}),
+		getHTML(),
+	)
 	if err == nil {
-		fmt.Printf("%s generated successfully\n", filename)
+		err = fileinfo.Output(getName(filename))
+		if err == nil {
+			fmt.Printf("%s generated successfully\n", filename)
+		}
 	}
 
 	// Output:

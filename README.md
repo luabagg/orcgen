@@ -42,27 +42,37 @@ Then you can import it in your Go code:
 ## Usage Example
 
 ```go
-    import "github.com/luabagg/orcgen/v2"
+import "github.com/luabagg/orcgen/v2"
 
-    // Webpage conversion
-    orcgen.Generate(
-        "https://www.github.com",
-        orcgen.ScreenshotConfig{
-            Format: "webp",
-        },
-        "github.webp",
-    )
+// Convert a URL to a screenshot
+err := orcgen.GenerateURL(
+    "https://www.github.com",
+    orcgen.Screenshot(orcgen.ScreenshotConfig{
+        Format: "webp",
+    }).FullPage(true),
+    "github.webp",
+)
 
-    // HTML conversion
-    orcgen.Generate(
-        []byte("my html"),
-        orcgen.PDFConfig{
-            Landscape:         true,
-            PrintBackground:   true,
-            PreferCSSPageSize: true,
-        },
-        "html.pdf",
-    )
+// Convert HTML bytes to a PDF
+htmlBytes := []byte("<html><body>Hello World</body></html>")
+err = orcgen.GenerateHTML(
+    htmlBytes,
+    orcgen.PDF(orcgen.PDFConfig{
+        Landscape:         true,
+        PrintBackground:   true,
+        PreferCSSPageSize: true,
+    }),
+    "output.pdf",
+)
+
+// Advanced: Use ConvertHTML/ConvertURL for more control
+fileInfo, err := orcgen.ConvertURL(
+    orcgen.PDF(orcgen.PDFConfig{Landscape: true}),
+    "https://example.com",
+)
+if err == nil {
+    fileInfo.Output("custom.pdf")
+}
 ```
 
 The package comes with examples that demonstrate the usage of the various functions and features provided by Orcgen. It's the way-to-go if you're trying to use this package for the first time.

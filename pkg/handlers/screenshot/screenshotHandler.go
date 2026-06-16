@@ -16,14 +16,14 @@ type ScreenshotHandler struct {
 
 // New creates a new ScreenshotHandler instance.
 //
-// png is the default extension.
+// PNG is the default format. Quality is only relevant for JPEG format.
 func New() handlers.FileHandler[proto.PageCaptureScreenshot] {
 	handler := &ScreenshotHandler{
 		fullPage: false,
 	}
 	handler.SetConfig(proto.PageCaptureScreenshot{
 		Format:                "png",
-		Quality:               new(int),
+		Quality:               nil, // Quality is only used for JPEG format
 		FromSurface:           false,
 		CaptureBeyondViewport: false,
 		OptimizeForSpeed:      false,

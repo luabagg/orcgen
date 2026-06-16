@@ -18,51 +18,112 @@ import (
 type ScreenshotConfig = proto.PageCaptureScreenshot
 type PDFConfig = proto.PagePrintToPDF
 
-// Generate generates a file from the given HTML / URL and outputs it to the given path.
+// HandlerBuilder provides a fluent API for building file handlers.
+// This eliminates the need for runtime type assertions.
+type HandlerBuilder struct {
+	handler handlers.BaseHandler
+}
+
+// PDF creates a handler builder for PDF generation.
+// Example:
 //
-// There's no checking in the extension type, so make sure to use the correct one.
-func Generate[T string | []byte, Config handlers.Config](html T, config Config, output string) error {
-	handler := NewHandler(config)
+//	err := orcgen.GenerateURL("https://example.com",
+//	    orcgen.PDF(orcgen.PDFConfig{Landscape: true}),
+//	    "output.pdf")
+func PDF(config PDFConfig) *HandlerBuilder {
+	handler := pdf.New().SetConfig(config)
+	return &HandlerBuilder{handler: handler}
+}
 
-	var fileinfo *fileinfo.Fileinfo
-	var err error
+// Screenshot creates a handler builder for screenshot generation.
+// Example:
+//
+//	err := orcgen.GenerateHTML(htmlBytes,
+//	    orcgen.Screenshot(orcgen.ScreenshotConfig{Format: "png"}),
+//	    "output.png")
+func Screenshot(config ScreenshotConfig) *HandlerBuilder {
+	handler := screenshot.New().SetConfig(config)
+	return &HandlerBuilder{handler: handler}
+}
 
-	if _, ok := any(html).([]byte); ok {
-		fileinfo, err = ConvertHTML(handler, any(html).([]byte))
-	} else {
-		fileinfo, err = ConvertWebpage(handler, any(html).(string))
+// FullPage configures whether to capture the full page or just the first page.
+// Returns the builder for method chaining.
+func (hb *HandlerBuilder) FullPage(enabled bool) *HandlerBuilder {
+	// Type assert to set full page on the underlying handler
+	switch h := hb.handler.(type) {
+	case handlers.FileHandler[proto.PagePrintToPDF]:
+		hb.handler = h.SetFullPage(enabled)
+	case handlers.FileHandler[proto.PageCaptureScreenshot]:
+		hb.handler = h.SetFullPage(enabled)
 	}
+	return hb
+}
 
+// GenerateHTML generates a file from HTML bytes and outputs it to the given path.
+//
+// This is the recommended way to generate files from HTML.
+// Example:
+//
+//	err := orcgen.GenerateHTML(htmlBytes,
+//	    orcgen.PDF(orcgen.PDFConfig{Landscape: true}).FullPage(true),
+//	    "output.pdf")
+func GenerateHTML(html []byte, builder *HandlerBuilder, output string) error {
+	wd := webdriver.FromDefault()
+	defer wd.Close()
+
+	page, err := wd.HTMLToPage(html)
 	if err != nil {
 		return err
 	}
+
+	if err := wd.WaitLoad(page); err != nil {
+		return err
+	}
+
+	fileinfo, err := builder.handler.GenerateFile(page)
+	if err != nil {
+		return err
+	}
+
 	return fileinfo.Output(output)
 }
 
-// NewHandler creates a handler from the config.
+// GenerateURL generates a file from a URL and outputs it to the given path.
 //
-// It checks the config type and instanciates the handler accordingly.
-func NewHandler[Config handlers.Config](config Config) handlers.FileHandler[Config] {
-	var handler any
+// Example:
+//
+//	err := orcgen.GenerateURL("https://example.com",
+//	    orcgen.Screenshot(orcgen.ScreenshotConfig{Format: "png"}),
+//	    "output.png")
+func GenerateURL(url string, builder *HandlerBuilder, output string) error {
+	wd := webdriver.FromDefault()
+	defer wd.Close()
 
-	if _, ok := any(config).(PDFConfig); ok {
-		handler = pdf.New()
-	} else if _, ok := any(config).(ScreenshotConfig); ok {
-		handler = screenshot.New()
-	} else {
-		panic("invalid config type provided")
+	page, err := wd.UrlToPage(url)
+	if err != nil {
+		return err
 	}
 
-	return any(handler).(handlers.FileHandler[Config]).SetConfig(config)
+	if err := wd.WaitLoad(page); err != nil {
+		return err
+	}
+
+	fileinfo, err := builder.handler.GenerateFile(page)
+	if err != nil {
+		return err
+	}
+
+	return fileinfo.Output(output)
 }
 
-// ConvertHTML converts the bytes using the given handler, and returns a Fileinfo object.
-//
-// handler is a Handler instance (see pkg/handlers).
-// html is the html byte array (if it's a filepath, use os.ReadFile(filepath)).
+// ConvertHTML converts HTML bytes using the given handler builder, and returns a Fileinfo object.
 //
 // The connection with the Browser is automatically closed.
-func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], html []byte) (*fileinfo.Fileinfo, error) {
+//
+// Example:
+//
+//	fi, err := orcgen.ConvertHTML(orcgen.PDF(config), htmlBytes)
+func ConvertHTML(builder *HandlerBuilder, html []byte) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
@@ -70,23 +131,33 @@ func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], h
 	if err != nil {
 		return nil, err
 	}
-	wd.WaitLoad(page)
 
-	return handler.GenerateFile(page)
+	if err := wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
+
+	return builder.handler.GenerateFile(page)
 }
 
-// ConvertWebpage converts the url using the given handler, and returns a Fileinfo object
-//
-// handler is a Handler instance (see pkg/handlers).
-// url will be converted as configured, if you need special treats, check the Webdriver docs.
+// ConvertURL converts a URL using the given handler builder, and returns a Fileinfo object.
 //
 // The connection with the Browser is automatically closed.
-func ConvertWebpage[Config handlers.Config](handler handlers.FileHandler[Config], url string) (*fileinfo.Fileinfo, error) {
+//
+// Example:
+//
+//	fi, err := orcgen.ConvertURL(orcgen.Screenshot(config), "https://example.com")
+func ConvertURL(builder *HandlerBuilder, url string) (*fileinfo.Fileinfo, error) {
 	wd := webdriver.FromDefault()
 	defer wd.Close()
 
-	page := wd.UrlToPage(url)
-	wd.WaitLoad(page)
+	page, err := wd.UrlToPage(url)
+	if err != nil {
+		return nil, err
+	}
 
-	return handler.GenerateFile(page)
+	if err := wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
+
+	return builder.handler.GenerateFile(page)
 }
