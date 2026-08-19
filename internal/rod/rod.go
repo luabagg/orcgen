@@ -49,8 +49,8 @@ func (r *Rod) Close() {
 	r.Browser.MustClose()
 }
 
-// UrlToPage converts the URL to a rod Page instance.
-func (r *Rod) UrlToPage(url string) *rod.Page {
+// URLToPage converts the URL to a rod Page instance.
+func (r *Rod) URLToPage(url string) *rod.Page {
 	return r.Browser.MustPage(url)
 }
 

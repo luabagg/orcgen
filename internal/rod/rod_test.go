@@ -29,7 +29,7 @@ func TestRod_Close(t *testing.T) {
 	assert.Nil(t, page)
 }
 
-func TestRod_UrlToPage(t *testing.T) {
+func TestRod_URLToPage(t *testing.T) {
 	rod := Rod{
 		LoadTimeout:  10 * time.Second,
 		PageIdleTime: 200 * time.Millisecond,
@@ -37,8 +37,8 @@ func TestRod_UrlToPage(t *testing.T) {
 	rod.Connect()
 	defer rod.Browser.Close()
 
-	// Call UrlToPage function to create a page instance
-	page := rod.UrlToPage("https://www.example.com")
+	// Call URLToPage function to create a page instance
+	page := rod.URLToPage("https://www.example.com")
 	assert.NotNil(t, page)
 
 	// Check that the page has loaded successfully

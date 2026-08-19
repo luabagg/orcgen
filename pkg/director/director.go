@@ -93,7 +93,7 @@ func (d *Director) convert(page *gorod.Page) (*fileinfo.Fileinfo, error) {
 
 // ConvertWebpage converts from an URL.
 func (d *Director) ConvertWebpage(url string) (*fileinfo.Fileinfo, error) {
-	page := d.rod.UrlToPage(url)
+	page := d.rod.URLToPage(url)
 
 	return d.convert(page)
 }
