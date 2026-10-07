@@ -89,7 +89,7 @@ func TestPDFHandler_GenerateFile(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// generate the PDF file
-			wd.WaitLoad(tc.input)
+			assert.NoError(t, wd.WaitLoad(tc.input), "Expected the page to load")
 			pdfData, err := tc.instance.GenerateFile(tc.input)
 
 			assert.NoError(t, err, "Expected no error")

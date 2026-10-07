@@ -1,7 +1,11 @@
 package webdriver
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -95,7 +99,7 @@ func TestWebDriver_WaitLoad(t *testing.T) {
 	defer page.MustClose()
 
 	// call WaitLoad function
-	webDriver.WaitLoad(page)
+	assert.NoError(t, webDriver.WaitLoad(page))
 
 	// assert that the page is loaded and idle
 	if !page.MustEval(`() => window.performance.timing.loadEventEnd > 0`).Bool() {
@@ -104,4 +108,70 @@ func TestWebDriver_WaitLoad(t *testing.T) {
 	if !page.MustEval(`() => window.requestIdleCallback !== undefined`).Bool() {
 		t.Errorf("Page is not idle")
 	}
+}
+
+// newStallServer serves html at "/" and never answers "/stall" until the test ends.
+func newStallServer(t *testing.T, html string) *httptest.Server {
+	release := make(chan struct{})
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+		fmt.Fprint(w, html)
+	})
+	mux.HandleFunc("/stall", func(_ http.ResponseWriter, r *http.Request) {
+		select {
+		case <-release:
+		case <-r.Context().Done():
+		}
+	})
+	srv := httptest.NewServer(mux)
+	// Cleanups run in reverse order: release the handlers, then close the server.
+	t.Cleanup(srv.Close)
+	t.Cleanup(func() { close(release) })
+
+	return srv
+}
+
+func TestWebDriver_WaitLoad_LoadTimeout(t *testing.T) {
+	srv := newStallServer(t, `<html><body><img src="/stall"></body></html>`)
+
+	webDriver := &WebDriver{
+		LoadTimeout:  time.Second,
+		PageIdleTime: 200 * time.Millisecond,
+	}
+	webDriver.Connect()
+	defer webDriver.Close()
+
+	page := webDriver.UrlToPage(srv.URL)
+	defer page.MustClose()
+
+	start := time.Now()
+	err := webDriver.WaitLoad(page)
+
+	assert.True(t, errors.Is(err, context.DeadlineExceeded), "expected a deadline error, got %v", err)
+	assert.Less(t, time.Since(start), 5*time.Second, "expected WaitLoad to stop at LoadTimeout")
+}
+
+func TestWebDriver_WaitLoad_NetworkNeverIdle(t *testing.T) {
+	srv := newStallServer(t, `<html><body><script>
+		setInterval(() => fetch("/stall").catch(() => {}), 50);
+	</script></body></html>`)
+
+	webDriver := &WebDriver{
+		LoadTimeout:  time.Second,
+		PageIdleTime: 200 * time.Millisecond,
+	}
+	webDriver.Connect()
+	defer webDriver.Close()
+
+	page := webDriver.UrlToPage(srv.URL)
+	defer page.MustClose()
+
+	start := time.Now()
+	err := webDriver.WaitLoad(page)
+
+	assert.NoError(t, err, "expected the page to be used as it is when the network is not idle")
+	assert.Less(t, time.Since(start), 5*time.Second, "expected WaitLoad to stop at LoadTimeout")
+
+	_, err = page.PDF(&proto.PagePrintToPDF{})
+	assert.NoError(t, err, "expected the page to render after the timeout")
 }

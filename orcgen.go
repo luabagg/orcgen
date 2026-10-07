@@ -70,7 +70,9 @@ func ConvertHTML[Config handlers.Config](handler handlers.FileHandler[Config], h
 	if err != nil {
 		return nil, err
 	}
-	wd.WaitLoad(page)
+	if err = wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
 
 	return handler.GenerateFile(page)
 }
@@ -86,7 +88,9 @@ func ConvertWebpage[Config handlers.Config](handler handlers.FileHandler[Config]
 	defer wd.Close()
 
 	page := wd.UrlToPage(url)
-	wd.WaitLoad(page)
+	if err := wd.WaitLoad(page); err != nil {
+		return nil, err
+	}
 
 	return handler.GenerateFile(page)
 }

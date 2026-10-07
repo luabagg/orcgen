@@ -23,9 +23,15 @@ func Example() {
 
 	// Using the page directly to search before screnshotting:
 	page := wd.UrlToPage("https://google.com")
-	wd.WaitLoad(page)
+	if err := wd.WaitLoad(page); err != nil {
+		fmt.Println(err)
+		return
+	}
 	page.MustInsertText("github orcgen package golang").Keyboard.Type(input.Enter)
-	wd.WaitLoad(page)
+	if err := wd.WaitLoad(page); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Using the handler directly - creates a PNG of the Google search:
 	fileinfo, err := screenshotHandler.GenerateFile(page)

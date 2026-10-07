@@ -3,6 +3,7 @@ package webdriver
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -81,12 +82,21 @@ func (r *WebDriver) HTMLToPage(html []byte) (*rod.Page, error) {
 	return page, nil
 }
 
-// WaitLoad sets a wait time according to the page loading.
-func (r *WebDriver) WaitLoad(page *rod.Page) {
-	page = page.Timeout(r.LoadTimeout).MustWaitLoad()
+// WaitLoad waits for the page load event, then for the network to be idle.
+//
+// LoadTimeout limits the two waits together.
+// It returns an error if the page does not load before the timeout.
+// If the network is not idle before the timeout, it returns nil and the page is used as it is.
+func (r *WebDriver) WaitLoad(page *rod.Page) error {
+	page = page.Timeout(r.LoadTimeout)
+	defer page.CancelTimeout()
+
+	if err := page.WaitLoad(); err != nil {
+		return fmt.Errorf("wait for page load: %w", err)
+	}
 
 	wait := page.WaitRequestIdle(r.PageIdleTime, nil, nil, nil)
 	wait()
 
-	page.CancelTimeout()
+	return nil
 }
