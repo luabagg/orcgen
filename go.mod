@@ -1,3 +1,4 @@
+// Deprecated: not maintained. See https://github.com/luabagg/orcgen.
 module github.com/luabagg/orcgen
 
 go 1.19
